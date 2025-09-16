@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absence Tracker</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <a class="brand" href="#">
+          <svg class="brand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          <span class="brand-name">Acme HR</span>
+        </a>
+      </div>
+      <nav class="nav">
+        <a href="#">Dashboard</a>
+        <a href="#">Employees</a>
+        <a class="active" href="#">Absences</a>
+        <a href="#">Reports</a>
+      </nav>
+      <div class="header-right">
+        <button class="icon-button">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <img alt="User avatar" class="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmQf2vygWEjWviZ9ns2f4aSSvopGZE_WGG6LFfdymZs3GNRL9bGxgSTl4D0SgC1mfhCkYEnaSbaEoznHIUlfvzCcPhwjdPCqO5DEcYVICNYLP6daKQecjcpnR7yAqkLR-QSsAWdvJ51xF37rhgul5qEpD3fk2EqfjGj4aSd6RZGr63JJv4T3iaZw2oI0NfONTWxexvOns6EHeM8FR7hew_h3axBllD6hKj38EOugX_OlXH54YeJhfbmFiOInJ_5HWIb2id8Ho0SNA" />
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="main-header">
+        <h1>Absence List</h1>
+        <div class="legend">
+          <div><span class="dot green"></span> Present</div>
+          <div><span class="dot red"></span> Absent</div>
+          <div><span class="dot yellow"></span> Planned</div>
+          <button class="primary-btn">
+            <span class="material-symbols-outlined">add</span> Add Absence
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-left">
+          <div class="date-picker">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <input type="text" placeholder="Select Dates" />
+          </div>
+          <div class="range-buttons">
+            <button>Today</button>
+            <button class="active">Week</button>
+            <button>Month</button>
+          </div>
+          <button class="reset-btn">
+            <span class="material-symbols-outlined">refresh</span> Reset
+          </button>
+        </div>
+        <div class="filter-right">
+          <button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button>
+          <span class="date-label">October 21-27, 2024</span>
+          <button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Mon<br>21</th>
+              <th>Tue<br>22</th>
+              <th>Wed<br>23</th>
+              <th>Thu<br>24</th>
+              <th>Fri<br>25</th>
+              <th class="weekend">Sat<br>26</th>
+              <th class="weekend">Sun<br>27</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sophia Carter</td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell red"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td></td><td></td>
+            </tr>
+            <tr>
+              <td>Ethan Bennett</td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell yellow"></div></td>
+              <td><div class="cell yellow"></div></td>
+              <td></td><td></td>
+            </tr>
+            <tr>
+              <td>Olivia Harper</td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell green"></div></td>
+              <td><div class="cell red"></div></td>
+              <td></td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,241 @@
+/* === General === */
+body {
+  font-family: "Inter", sans-serif;
+  background: #f9fafb;
+  color: #1f2937;
+  margin: 0;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* === Layout === */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* === Header === */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+}
+
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  color: #2563eb;
+}
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+}
+.nav a {
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav a:hover { color: #111827; }
+.nav .active { color: #2563eb; font-weight: 600; }
+
+.icon-button {
+  background: none;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.icon-button:hover { background: #f3f4f6; }
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+}
+
+/* === Main === */
+.main {
+  flex: 1;
+  padding: 3rem;
+}
+
+/* === Legend / Header === */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.main-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+.legend {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.dot {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+}
+.dot.green { background: #4ade80; }
+.dot.red { background: #f87171; }
+.dot.yellow { background: #facc15; }
+
+.primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+}
+.primary-btn:hover { background: #1d4ed8; }
+
+/* === Filters === */
+.filters {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.filter-left {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.date-picker {
+  position: relative;
+}
+.date-picker span {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+.date-picker input {
+  padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+}
+
+.range-buttons {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.range-buttons button {
+  border: none;
+  background: none;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  color: #4b5563;
+}
+.range-buttons button:hover { background: #e5e7eb; }
+.range-buttons .active {
+  background: #fff;
+  color: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 0 2px rgba(0,0,0,0.1);
+}
+
+.reset-btn {
+  border: 1px solid #d1d5db;
+  background: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.filter-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.date-label { font-weight: 600; color: #374151; }
+
+/* === Table === */
+.table-wrapper {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+thead {
+  background: #f9fafb;
+}
+th, td {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+}
+th:first-child, td:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: #fff;
+}
+.weekend {
+  color: #9ca3af;
+}
+
+.cell {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  margin: 0 auto;
+  cursor: pointer;
+}
+.cell.green { background: #dcfce7; }
+.cell.green:hover { background: #bbf7d0; }
+.cell.red { background: #fee2e2; }
+.cell.red:hover { background: #fecaca; }
+.cell.yellow { background: #fef9c3; }
+.cell.yellow:hover { background: #fef08a; }
