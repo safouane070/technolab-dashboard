@@ -1,3 +1,37 @@
+<?php
+
+// Verbinding maken
+try {
+    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Fout!: " . $e->getMessage());
+}
+
+// Status bijwerken
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
+    $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
+    $stmt->execute([
+        ':status' => $_POST['status'],
+        ':id' => intval($_POST['id'])
+    ]);
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// Verwijderen
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    echo "<p style='color:red;'>Werknemer is verwijderd.</p>";
+}
+
+// Ophalen
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status FROM werknemers");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +41,16 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-  <link rel="stylesheet" href="dagplanning.css"/>
+  <link rel="stylesheet" href="css/dagplanning.css"/>
 </head>
+<style>
+
+
+.status-aanwezig { background-color: #c8e6c9; }
+.status-afwezig  { background-color: #ffcdd2; }
+.status-ziek     { background-color: #fff9c4; }
+.status-opdeschool { background-color: #bbdefb; }
+</style>
 <body>
   <div class="app">
     <header class="header">
@@ -76,45 +118,53 @@
       <div class="table-container">
         <table>
           <thead>
-            <tr>
-              <th>Employee</th>
+          <tr>
+              <th>Naam</th>
+              <th>Locatie</th>
               <th>Status</th>
-              <th>Type</th>
-              <th>Reason</th>
-              <th></th>
-            </tr>
-          </thead>
+              <th>Acties</th>
+          </tr>
           <tbody>
-            <tr>
-              <td>Sophia Carter</td>
-              <td><span class="badge present">Present</span></td>
-              <td>-</td><td>-</td>
-              <td><a href="#">Edit</a></td>
-            </tr>
-            <tr>
-              <td>Ethan Bennett</td>
-              <td><span class="badge present">Present</span></td>
-              <td>-</td><td>-</td>
-              <td><a href="#">Edit</a></td>
-            </tr>
-            <tr>
-              <td>Olivia Harper</td>
-              <td><span class="badge absent">Absent</span></td>
-              <td>Unplanned</td><td>Sick Leave</td>
-              <td><a href="#">Edit</a></td>
-            </tr>
-            <tr>
-              <td>Liam Foster</td>
-              <td><span class="badge planned">Planned</span></td>
-              <td>Planned</td><td>Vacation</td>
-              <td><a href="#">Edit</a></td>
-            </tr>
-            <tr>
-              <td>Ava Morgan</td>
-              <td><span class="badge present">Present</span></td>
-              <td>-</td><td>-</td>
-              <td><a href="#">Edit</a></td>
-            </tr>
+            <?php if (count($werknemers) > 0): ?>
+                <?php foreach ($werknemers as $w): ?>
+                    <?php
+                    $statusClass = '';
+                    if ($w['status'] == 'Aanwezig') {
+                        $statusClass = 'status-aanwezig';
+                    } elseif ($w['status'] == 'Afwezig') {
+                        $statusClass = 'status-afwezig';
+                    } elseif ($w['status'] == 'Ziek') {
+                        $statusClass = 'status-ziek';
+                    } elseif ($w['status'] == 'Op de school') {
+                        $statusClass = 'status-opdeschool';
+                    }
+                    ?>
+                    <tr class="<?= $statusClass ?>">
+                        <td>
+                            <?= ($w['voornaam'] . ' ' . ($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '') . $w['achternaam']) ?>
+                        </td>
+                        <td>
+                            <?= $w['status'] == 'Aanwezig' ? 'Technolab' : 'Unknown' ?>
+                        </td>
+                        <td>
+                            <form method="post" action="">
+                                <select name="status" onchange="this.form.submit()">
+                                    <option value="Aanwezig"   <?= $w['status']=='Aanwezig' ? 'selected' : '' ?>>Aanwezig</option>
+                                    <option value="Afwezig"    <?= $w['status']=='Afwezig' ? 'selected' : '' ?>>Afwezig</option>
+                                    <option value="Ziek"       <?= $w['status']=='Ziek' ? 'selected' : '' ?>>Ziek</option>
+                                    <option value="Op de school" <?= $w['status']=='Op de school' ? 'selected' : '' ?>>Op de school</option>
+                                </select>
+                                <input type="hidden" name="id" value="<?= $w['id'] ?>">
+                            </form>
+                        </td>
+                        <td>
+                            <a href="?delete=<?= $w['id'] ?>" onclick="return confirm('Weet je zeker dat je deze werknemer wilt verwijderen?');">Verwijder</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr><td colspan="4">Geen werknemers gevonden</td></tr>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
