@@ -1,6 +1,5 @@
 <?php
 
-// Verbinding maken
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -19,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     exit;
 }
 
-// Verwijderen
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
@@ -27,7 +25,6 @@ if (isset($_GET['delete'])) {
     echo "<p style='color:red;'>Werknemer is verwijderd.</p>";
 }
 
-// Ophalen
 $stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status FROM werknemers");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -37,16 +34,21 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Absence Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <title>Absence Tracker</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
   <link rel="stylesheet" href="css/dagplanning.css"/>
 </head>
 <style>
 
 
-.status-aanwezig { background-color: #c8e6c9; }
+.status-aanwezig { background-color: #83dc85; }
 .status-afwezig  { background-color: #ffcdd2; }
 .status-ziek     { background-color: #fff9c4; }
 .status-opdeschool { background-color: #bbdefb; }
@@ -101,7 +103,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
           <div class="toggle-group">
             <button class="toggle active">Today</button>
-            <button class="toggle">Week</button>
+              <a href="week.php"><button class="toggle">Week</button></a>
+
             <button class="toggle">Month</button>
           </div>
           <button class="btn-secondary">
@@ -148,7 +151,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td>
                             <form method="post" action="">
-                                <select name="status" onchange="this.form.submit()">
+                                <select  class="filter-elements filter-lists" id="filter-status" name="status" onchange="this.form.submit()">
                                     <option value="Aanwezig"   <?= $w['status']=='Aanwezig' ? 'selected' : '' ?>>Aanwezig</option>
                                     <option value="Afwezig"    <?= $w['status']=='Afwezig' ? 'selected' : '' ?>>Afwezig</option>
                                     <option value="Ziek"       <?= $w['status']=='Ziek' ? 'selected' : '' ?>>Ziek</option>
@@ -158,7 +161,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </form>
                         </td>
                         <td>
-                            <a href="?delete=<?= $w['id'] ?>" onclick="return confirm('Weet je zeker dat je deze werknemer wilt verwijderen?');">Verwijder</a>
+                            <a href="details.php?id=<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i>|</a>
+                            <a href="?delete=<?= $w['id'] ?>" onclick="return confirm('Weet je zeker dat je deze werknemer wilt verwijderen?');"><i class=" bi bi-trash3"></i></a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

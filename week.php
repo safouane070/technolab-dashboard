@@ -62,7 +62,7 @@
             <input type="text" placeholder="Select Dates" />
           </div>
           <div class="range-buttons">
-            <button>Today</button>
+              <a href="dagplanning.php"><button class="toggle">Today</button></a>
             <button class="active">Week</button>
             <button>Month</button>
           </div>
