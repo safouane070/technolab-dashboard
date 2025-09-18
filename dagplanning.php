@@ -7,7 +7,26 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// Status bijwerken
+$today = date('N'); // 1 = maandag, 2 = dinsdag, ... 7 = zondag
+
+$daysMap = [
+    1 => 'werkdag_ma',
+    2 => 'werkdag_di',
+    3 => 'werkdag_wo',
+    4 => 'werkdag_do',
+    5 => 'werkdag_vr'
+];
+
+if ($today >= 1 && $today <= 5) {
+    $column = $daysMap[$today];
+
+    $db->exec("UPDATE werknemers SET status = 'Afwezig' WHERE status NOT IN ('Aanwezig','Ziek','Op de school')");
+
+    $stmt = $db->prepare("UPDATE werknemers SET status = 'Aanwezig' WHERE $column = 1 AND status NOT IN ('Afwezig','Ziek','Op de school')");
+    $stmt->execute();
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
     $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
     $stmt->execute([
@@ -18,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     exit;
 }
 
+
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
@@ -25,8 +45,10 @@ if (isset($_GET['delete'])) {
     echo "<p style='color:red;'>Werknemer is verwijderd.</p>";
 }
 
+
 $stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status FROM werknemers");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -49,8 +71,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
 .status-aanwezig { background-color: #83dc85; }
-.status-afwezig  { background-color: #ffcdd2; }
-.status-ziek     { background-color: #fff9c4; }
+.status-afwezig  { background-color: #fb8190; }
+.status-ziek     { background-color: #f1d872; }
 .status-opdeschool { background-color: #bbdefb; }
 </style>
 <body>
@@ -68,9 +90,9 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
 
       <nav class="nav">
-        <a href="#">Dashboard</a>
+        <a href="dagplanning.php"class="active">Dashboard</a>
         <a href="#">Employees</a>
-        <a href="#" class="active">Absences</a>
+        <a href="absent.php" >Absences</a>
         <a href="#">Reports</a>
       </nav>
 
@@ -90,7 +112,9 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="status"><span class="dot absent"></span>Absent</div>
           <div class="status"><span class="dot planned"></span>Planned</div>
           <button class="btn-primary">
-            <span class="material-symbols-outlined">add</span> Add Absence
+               <span class="material-symbols-outlined">add</span> Add Absence
+
+
           </button>
         </div>
       </div>
@@ -172,6 +196,10 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </tbody>
         </table>
       </div>
+        <br>
+        <a href="add.php">
+            <button>➕ Voeg een medewerker toe</button>
+        </a>
     </main>
   </div>
 </body>

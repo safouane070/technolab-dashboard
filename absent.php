@@ -13,7 +13,7 @@
   <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
   <!-- CSS -->
-  <link rel="stylesheet" href="absent.css" />
+  <link rel="stylesheet" href="css/absent.css" />
 </head>
 <body>
 
