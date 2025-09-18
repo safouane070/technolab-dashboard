@@ -20,9 +20,9 @@ $daysMap = [
 if ($today >= 1 && $today <= 5) {
     $column = $daysMap[$today];
 
-    $db->exec("UPDATE werknemers SET status = 'Afwezig' WHERE status NOT IN ('Aanwezig','Ziek','Op de school')");
+    $db->exec("UPDATE werknemers SET status = 'Afwezig' WHERE status NOT IN ('Aanwezig','Ziek','Eefetjes Afwezig','Op de school')");
 
-    $stmt = $db->prepare("UPDATE werknemers SET status = 'Aanwezig' WHERE $column = 1 AND status NOT IN ('Afwezig','Ziek','Op de school')");
+    $stmt = $db->prepare("UPDATE werknemers SET status = 'Aanwezig' WHERE $column = 1 AND status NOT IN ('Afwezig','Ziek','Eefetjes Afwezig','Op de school')");
     $stmt->execute();
 }
 
@@ -42,11 +42,16 @@ if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
     $stmt->execute([':id' => $id]);
-    echo "<p style='color:red;'>Werknemer is verwijderd.</p>";
 }
 
 
 $stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status FROM werknemers");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $db->query("
+    SELECT id, voornaam, tussenvoegsel, achternaam, status 
+    FROM werknemers
+    ORDER BY achternaam ASC, voornaam ASC
+");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
@@ -70,10 +75,12 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <style>
 
 
-.status-aanwezig { background-color: #83dc85; }
-.status-afwezig  { background-color: #fb8190; }
-.status-ziek     { background-color: #f1d872; }
-.status-opdeschool { background-color: #bbdefb; }
+.status-aanwezig { background-color: #55cc32; }
+.status-afwezig  { background-color: #df2a2a; }
+.status-ziek     { background-color: #f7e379; }
+.status-opdeschool { background-color: #bbdb44; }
+.status-eefetjes { background-color: #f2a134; }
+
 </style>
 <body>
   <div class="app">
@@ -98,10 +105,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       <div class="user-actions">
         <button class="icon-btn">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <img class="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmQf2vygWEjWviZ9ns2f4aSSvopGZE_WGG6LFfdymZs3GNRL9bGxgSTl4D0SgC1mfhCkYEnaSbaEoznHIUlfvzCcPhwjdPCqO5DEcYVICNYLP6daKQecjcpnR7yAqkLR-QSsAWdvJ51xF37rhgul5qEpD3fk2EqfjGj4aSd6RZGr63JJv4T3iaZw2oI0NfONTWxexvOns6EHeM8FR7hew_h3axBllD6hKj38EOugX_OlXH54YeJhfbmFiOInJ_5HWIb2id8Ho0SNA" alt="User avatar">
-      </div>
+           </div>
     </header>
 
     <main class="main">
@@ -164,6 +168,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $statusClass = 'status-ziek';
                     } elseif ($w['status'] == 'Op de school') {
                         $statusClass = 'status-opdeschool';
+                    } elseif ($w['status'] == 'Eefetjes Afwezig') {
+                        $statusClass = 'status-eefetjes';
                     }
                     ?>
                     <tr class="<?= $statusClass ?>">
@@ -175,11 +181,12 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td>
                             <form method="post" action="">
-                                <select  class="filter-elements filter-lists" id="filter-status" name="status" onchange="this.form.submit()">
-                                    <option value="Aanwezig"   <?= $w['status']=='Aanwezig' ? 'selected' : '' ?>>Aanwezig</option>
-                                    <option value="Afwezig"    <?= $w['status']=='Afwezig' ? 'selected' : '' ?>>Afwezig</option>
-                                    <option value="Ziek"       <?= $w['status']=='Ziek' ? 'selected' : '' ?>>Ziek</option>
+                                <select class="filter-elements filter-lists" id="filter-status" name="status" onchange="this.form.submit()">
+                                    <option value="Aanwezig" <?= $w['status']=='Aanwezig' ? 'selected' : '' ?>>Aanwezig</option>
+                                    <option value="Afwezig" <?= $w['status']=='Afwezig' ? 'selected' : '' ?>>Afwezig</option>
+                                    <option value="Ziek" <?= $w['status']=='Ziek' ? 'selected' : '' ?>>Ziek</option>
                                     <option value="Op de school" <?= $w['status']=='Op de school' ? 'selected' : '' ?>>Op de school</option>
+                                    <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig' ? 'selected' : '' ?>>Eefetjes Afwezig</option>
                                 </select>
                                 <input type="hidden" name="id" value="<?= $w['id'] ?>">
                             </form>
