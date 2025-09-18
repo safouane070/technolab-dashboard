@@ -20,9 +20,9 @@ $daysMap = [
 if ($today >= 1 && $today <= 5) {
     $column = $daysMap[$today];
 
-    $db->exec("UPDATE werknemers SET status = 'Afwezig' WHERE status NOT IN ('Aanwezig','Ziek','Eefetjes Afwezig','Op de school')");
+    $db->exec("UPDATE werknemers SET status = 'Afwezig' WHERE status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
 
-    $stmt = $db->prepare("UPDATE werknemers SET status = 'Aanwezig' WHERE $column = 1 AND status NOT IN ('Afwezig','Ziek','Eefetjes Afwezig','Op de school')");
+    $stmt = $db->prepare("UPDATE werknemers SET status = 'Aanwezig' WHERE $column = 1 AND status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
     $stmt->execute();
 }
 
