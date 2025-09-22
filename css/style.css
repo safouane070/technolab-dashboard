@@ -30,7 +30,8 @@ body {
   top: 0;
 }
 
-.header-left, .header-right {
+.header-left,
+.header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -62,8 +63,13 @@ body {
   text-decoration: none;
   font-weight: 500;
 }
-.nav a:hover { color: #111827; }
-.nav .active { color: #2563eb; font-weight: 600; }
+.nav a:hover {
+  color: #111827;
+}
+.nav .active {
+  color: #2563eb;
+  font-weight: 600;
+}
 
 .icon-button {
   background: none;
@@ -72,7 +78,9 @@ body {
   padding: 0.5rem;
   cursor: pointer;
 }
-.icon-button:hover { background: #f3f4f6; }
+.icon-button:hover {
+  background: #f3f4f6;
+}
 
 .avatar {
   width: 40px;
@@ -107,9 +115,15 @@ body {
   height: 1rem;
   border-radius: 9999px;
 }
-.dot.green { background: #4ade80; }
-.dot.red { background: #f87171; }
-.dot.yellow { background: #facc15; }
+.dot.green {
+  background: #4ade80;
+}
+.dot.red {
+  background: #f87171;
+}
+.dot.yellow {
+  background: #facc15;
+}
 
 .primary-btn {
   display: flex;
@@ -122,7 +136,9 @@ body {
   padding: 0.625rem 1rem;
   cursor: pointer;
 }
-.primary-btn:hover { background: #1d4ed8; }
+.primary-btn:hover {
+  background: #1d4ed8;
+}
 
 /* === Filters === */
 .filters {
@@ -169,12 +185,14 @@ body {
   cursor: pointer;
   color: #4b5563;
 }
-.range-buttons button:hover { background: #e5e7eb; }
+.range-buttons button:hover {
+  background: #e5e7eb;
+}
 .range-buttons .active {
   background: #fff;
   color: #2563eb;
   font-weight: 600;
-  box-shadow: 0 0 2px rgba(0,0,0,0.1);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .reset-btn {
@@ -193,7 +211,10 @@ body {
   align-items: center;
   gap: 0.5rem;
 }
-.date-label { font-weight: 600; color: #374151; }
+.date-label {
+  font-weight: 600;
+  color: #374151;
+}
 
 /* === Table === */
 .table-wrapper {
@@ -210,13 +231,15 @@ table {
 thead {
   background: #f9fafb;
 }
-th, td {
+th,
+td {
   padding: 1rem;
   text-align: center;
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.875rem;
 }
-th:first-child, td:first-child {
+th:first-child,
+td:first-child {
   text-align: left;
   position: sticky;
   left: 0;
@@ -233,9 +256,130 @@ th:first-child, td:first-child {
   margin: 0 auto;
   cursor: pointer;
 }
-.cell.green { background: #dcfce7; }
-.cell.green:hover { background: #bbf7d0; }
-.cell.red { background: #fee2e2; }
-.cell.red:hover { background: #fecaca; }
-.cell.yellow { background: #fef9c3; }
-.cell.yellow:hover { background: #fef08a; }
+.cell.green {
+  background: #dcfce7;
+}
+.cell.green:hover {
+  background: #bbf7d0;
+}
+.cell.red {
+  background: #fee2e2;
+}
+.cell.red:hover {
+  background: #fecaca;
+}
+.cell.yellow {
+  background: #fef9c3;
+}
+.cell.yellow:hover {
+  background: #fef08a;
+}
+
+/* === Details Card (werknemer) === */
+.card {
+  background: #ffffff;
+  padding: 25px 30px;
+  max-width: 550px;
+  margin: 40px auto;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.card p {
+  margin: 12px 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.card strong {
+  color: #374151;
+  display: inline-block;
+  min-width: 100px;
+}
+
+/* === Status === */
+.status {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-block;
+}
+.status-aanwezig {
+  background: #4ade80;
+  color: #065f46;
+}
+.status-afwezig {
+  background: #f87171;
+  color: #7f1d1d;
+}
+.status-ziek {
+  background: #facc15;
+  color: #78350f;
+}
+.status-opdeschool {
+  background: #60a5fa;
+  color: #1e3a8a;
+}
+.status-eefetjes {
+  background: #c084fc;
+  color: #581c87;
+}
+
+/* === BHV === */
+.bhv {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.bhv-ja {
+  background: #34d399;
+  color: #064e3b;
+}
+.bhv-nee {
+  background: #f87171;
+  color: #7f1d1d;
+}
+
+/* === Werkdagen === */
+.werkdag {
+  display: inline-block;
+  margin: 0.25rem 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.werkdag.active {
+  background: #dcfce7; /* groen */
+  color: #166534;
+}
+.werkdag.inactive {
+  background: #f3f4f6; /* grijs */
+  color: #9ca3af;
+}
+
+/* === Terugknop === */
+.back-link {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 8px 14px;
+  background: #2563eb;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+.back-link:hover {
+  background: #1d4ed8;
+}

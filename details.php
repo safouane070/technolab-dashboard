@@ -26,68 +26,25 @@ if (!empty($werknemer['tussenvoegsel'])) {
 }
 $volledigeNaam .= ' ' . $werknemer['achternaam'];
 
-// Werkdagen lijst
-$werkdagen = [];
-if ($werknemer['werkdag_ma']) $werkdagen[] = "Maandag";
-if ($werknemer['werkdag_di']) $werkdagen[] = "Dinsdag";
-if ($werknemer['werkdag_wo']) $werkdagen[] = "Woensdag";
-if ($werknemer['werkdag_do']) $werkdagen[] = "Donderdag";
-if ($werknemer['werkdag_vr']) $werkdagen[] = "Vrijdag";
-$werkdagenText = !empty($werkdagen) ? implode(", ", $werkdagen) : "Geen";
+$dagen = [
+    'ma' => 'Maandag',
+    'di' => 'Dinsdag',
+    'wo' => 'Woensdag',
+    'do' => 'Donderdag',
+    'vr' => 'Vrijdag'
+];
 ?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Details van <?= ($volledigeNaam) ?></title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f0f2f5;
-        }
-        .card {
-            border: none;
-            padding: 20px 30px;
-            border-radius: 10px;
-            width: 480px;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            margin-top: 0;
-            color: #333;
-        }
-        .card p {
-            margin: 10px 0;
-            font-size: 15px;
-        }
-        .status {
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-        .status-aanwezig { background: #c8f7c5; color: #256029; }
-        .status-afwezig  { background: #f8c8c8; color: #7d2020; }
-        .status-ziek     { background: #fff3cd; color: #856404; }
-        .status-opdeschool { background: #d6eaff; color: #004085; }
-        .status-eefetjes { background: #ffe0b3; color: #804000; }
-        .bhv { font-weight: bold; }
-        .bhv-ja { color: green; }
-        .bhv-nee { color: red; }
-        a {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #007bff;
-        }
-    </style>
+    <title>Details van <?= htmlspecialchars($volledigeNaam) ?></title>
+    <link rel="stylesheet" href="css/details.css">
 </head>
 <body>
 <div class="card">
-    <h2><?= ($volledigeNaam) ?></h2>
-    <p><strong>Email:</strong> <?= ($werknemer['email']) ?></p>
+    <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
+    <p><strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
     <p><strong>Status:</strong>
         <span class="status
             <?= $werknemer['status']=='Aanwezig' ? 'status-aanwezig' : '' ?>
@@ -96,18 +53,26 @@ $werkdagenText = !empty($werkdagen) ? implode(", ", $werkdagen) : "Geen";
             <?= $werknemer['status']=='Op de school' ? 'status-opdeschool' : '' ?>
             <?= $werknemer['status']=='Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
         ">
-            <?= ($werknemer['status']) ?>
+            <?= htmlspecialchars($werknemer['status']) ?>
         </span>
     </p>
-    <p><strong>Sector:</strong> <?= ($werknemer['sector']) ?></p>
+    <p><strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
     <p><strong>BHV:</strong>
         <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
             <?= $werknemer['BHV'] ? 'Ja' : 'Nee' ?>
         </span>
     </p>
-    <p><strong>Werkdagen:</strong> <?= ($werkdagenText) ?></p>
+    <p><strong>Werkdagen:</strong></p>
+    <div class="werkdagen">
+        <?php foreach ($dagen as $afkorting => $naam): ?>
+            <?php $isWerkdag = $werknemer['werkdag_' . $afkorting]; ?>
+            <span class="werkdag <?= $isWerkdag ? 'active' : 'inactive' ?>">
+                <?= $naam ?>
+            </span>
+        <?php endforeach; ?>
+    </div>
     <br>
-    <a href="dagplanning.php">← Terug naar lijst</a>
+    <a href="dagplanning.php" class="back-link">← Terug naar lijst</a>
 </div>
 </body>
 </html>
