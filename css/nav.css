@@ -1,0 +1,105 @@
+/* ========================
+   NAVIGATION & HEADER CSS
+   ======================== */
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #f9fafb;
+  color: #1f2937;
+  margin: 0;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* Layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 2rem;
+}
+
+/* Logo */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-icon {
+  width: 10rem;
+  height: 2rem;
+  color: #2563eb;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  align-items: center; /* vertical centering */
+  gap: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.nav a {
+  color: #6b7280;
+  text-decoration: none;
+  padding: 0.5rem 0; /* vergroot klikbaar gebied */
+  transition: color 0.2s;
+}
+
+.nav a:hover {
+  color: #111827;
+}
+
+.nav .active {
+  font-weight: 600;
+  color: #2563eb;
+  border-bottom: 2px solid #2563eb; /* visuele indicatie actieve link */
+}
+
+/* User actions (iconen rechts) */
+.user-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f3f4f6;
+}
+
+.avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+}
