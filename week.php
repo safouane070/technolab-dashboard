@@ -128,7 +128,6 @@ $weekDays = [
           <div class="range-buttons">
               <a href="dagplanning.php"><button class="toggle">Today</button></a>
             <button class="active">Week</button>
-            <button>Month</button>
           </div>
           <button class="reset-btn">
             <span class="material-symbols-outlined">refresh</span> Reset

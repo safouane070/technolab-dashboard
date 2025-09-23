@@ -79,7 +79,6 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="toggle-group">
                     <button class="toggle active">Today</button>
                     <a href="week.php"><button class="toggle">Week</button></a>
-                    <button class="toggle">Month</button>
                 </div>
                 <button class="btn-secondary"><span class="material-symbols-outlined"></span> Reset</button>
             </div>
@@ -115,8 +114,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <option value="Aanwezig" <?= $w['status']=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
                                     <option value="Afwezig" <?= $w['status']=='Afwezig'?'selected':'' ?>>Afwezig</option>
                                     <option value="Ziek" <?= $w['status']=='Ziek'?'selected':'' ?>>Ziek</option>
-                                    <option value="Op de school" <?= $w['status']=='Op de school'?'selected':'' ?>>Op de school</option>
-                                    <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>Eefetjes Afwezig</option>
+                                    <option value="Op de school" <?= $w['status']=='Op de school'?'selected':'' ?>>Op school</option>
+                                    <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>tijdelijk Afwezig</option>
                                 </select>
                                 <input type="hidden" name="id" value="<?= $w['id'] ?>">
                             </form>
