@@ -10,7 +10,7 @@ if (!isset($_GET['id'])) {
     die("Geen werknemer geselecteerd.");
 }
 
-$id = intval($_GET['id']);
+$id = (int) $_GET['id'];
 
 $stmt = $db->prepare("SELECT * FROM werknemers WHERE id = :id");
 $stmt->execute([':id' => $id]);
@@ -38,29 +38,28 @@ $dagen = [
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Details van <?= ($volledigeNaam) ?></title>
+    <title>Details van <?= htmlspecialchars($volledigeNaam) ?></title>
     <link rel="stylesheet" href="css/details.css">
 </head>
 <body>
-
     <div class="card">
-        <h2><?= ($volledigeNaam) ?></h2>
+        <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
 
-        <p><strong>Email:</strong> <?= ($werknemer['email']) ?></p>
+        <p><strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
 
         <p><strong>Status:</strong>
             <span class="status
-                <?= $werknemer['status']=='Aanwezig' ? 'status-aanwezig' : '' ?>
-                <?= $werknemer['status']=='Afwezig' ? 'status-afwezig' : '' ?>
-                <?= $werknemer['status']=='Ziek' ? 'status-ziek' : '' ?>
-                <?= $werknemer['status']=='Op de school' ? 'status-opdeschool' : '' ?>
-                <?= $werknemer['status']=='Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
+                <?= $werknemer['status'] === 'Aanwezig' ? 'status-aanwezig' : '' ?>
+                <?= $werknemer['status'] === 'Afwezig' ? 'status-afwezig' : '' ?>
+                <?= $werknemer['status'] === 'Ziek' ? 'status-ziek' : '' ?>
+                <?= $werknemer['status'] === 'Op de school' ? 'status-opdeschool' : '' ?>
+                <?= $werknemer['status'] === 'Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
             ">
-                <?= ($werknemer['status']) ?>
+                <?= htmlspecialchars($werknemer['status']) ?>
             </span>
         </p>
 
-        <p><strong>Sector:</strong> <?= ($werknemer['sector']) ?></p>
+        <p><strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
 
         <p><strong>BHV:</strong>
             <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
@@ -73,12 +72,11 @@ $dagen = [
             <?php foreach ($dagen as $afkorting => $naam): ?>
                 <?php $isWerkdag = $werknemer['werkdag_' . $afkorting]; ?>
                 <span class="werkdag <?= $isWerkdag ? 'active' : 'inactive' ?>">
-                    <?= $naam ?>
+                    <?= htmlspecialchars($naam) ?>
                 </span>
             <?php endforeach; ?>
         </div>
 
-        <br>
         <a href="dagplanning.php" class="back-link">← Terug naar lijst</a>
     </div>
 </body>

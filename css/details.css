@@ -1,97 +1,138 @@
+/* Algemene body styling */
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
     margin: 0;
-    height: 100vh;
-    background: linear-gradient(135deg, #f0f2f5, #e2e8f0);
+    background: linear-gradient(135deg, #eef2f7, #dfe7f3);
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
 }
 
+/* Card */
 .card {
-    border: none;
-    padding: 30px 40px;
-    border-radius: 12px;
-    width: 500px;
-    background: #fff;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 40px 45px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    backdrop-filter: blur(8px);
+    max-width: 540px;
+    width: 100%;
+    text-align: center;
     animation: fadeIn 0.6s ease-in-out;
 }
 
+/* Naam bovenaan */
 .card h2 {
-    margin-top: 0;
-    color: #222;
-    font-size: 1.6rem;
-    margin-bottom: 15px;
-    text-align: center;
+    margin-top: 15px;
+    font-size: 28px;
+    color: #1a2a42;
+    margin-bottom: 25px;
+    font-weight: 600;
 }
 
+/* Info-teksten */
 .card p {
-    margin: 10px 0;
+    margin: 14px 0;
     font-size: 15px;
     color: #444;
+    line-height: 1.6;
+    text-align: left;
 }
 
+.card strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Avatar */
+.card::before {
+    content: "👤";
+    display: block;
+    font-size: 42px;
+    background: #e6ecf5;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Status badges */
 .status {
-    font-weight: bold;
-    padding: 4px 10px;
-    border-radius: 6px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 30px;
     display: inline-block;
+    font-size: 14px;
 }
 
-.status-aanwezig { background: #c8f7c5; color: #256029; }
-.status-afwezig  { background: #f8c8c8; color: #7d2020; }
-.status-ziek     { background: #fff3cd; color: #856404; }
-.status-opdeschool { background: #d6eaff; color: #004085; }
-.status-eefetjes { background: #ffe0b3; color: #804000; }
+.status-aanwezig { background: #d4f8df; color: #187a39; }
+.status-afwezig  { background: #ffe0e0; color: #9c1c1c; }
+.status-ziek     { background: #fff5cc; color: #7a6200; }
+.status-opdeschool { background: #d8ebff; color: #004f9e; }
+.status-eefetjes { background: #ffe9d1; color: #8a4b00; }
 
-.bhv { font-weight: bold; }
-.bhv-ja { color: green; }
-.bhv-nee { color: red; }
+/* BHV badges */
+.bhv {
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+}
 
+.bhv-ja { background: #d4f8df; color: #187a39; }
+.bhv-nee { background: #ffe0e0; color: #9c1c1c; }
+
+/* Werkdagen */
 .werkdagen {
-    margin-top: 10px;
+    margin-top: 14px;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .werkdag {
-    display: inline-block;
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border-radius: 30px;
     font-size: 14px;
     font-weight: 500;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .werkdag.active {
-    background: #c8f7c5;
-    color: #256029;
-    border: 1px solid #a3e6a0;
+    background: #d4f8df;
+    color: #187a39;
+    border: 1px solid #b6edc3;
 }
 
 .werkdag.inactive {
-    background: #e9ecef;
+    background: #f1f3f5;
     color: #6c757d;
     border: 1px solid #d6d8db;
 }
 
 .werkdag:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
 
+/* Terug link */
 a.back-link {
     display: inline-block;
-    margin-top: 20px;
+    margin-top: 30px;
     text-decoration: none;
-    color: #007bff;
+    color: #0066ff;
     font-weight: 500;
+    font-size: 15px;
+    transition: color 0.2s ease;
 }
 
 a.back-link:hover {
     text-decoration: underline;
+    color: #0044aa;
 }
 
 /* Animatie */

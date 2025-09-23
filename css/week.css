@@ -1,0 +1,181 @@
+.status-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.status-dot:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+/* Status kleuren */
+.status-aanwezig   { background-color: #4caf50; }   /* groen */
+.status-afwezig    { background-color: #f44336; }   /* rood */
+.status-ziek       { background-color: #ffeb3b; }   /* geel */
+.status-opdeschool { background-color: #2196f3; }   /* blauw */
+.status-eefetjesafwezig { background-color: #ff9800; } /* oranje */
+
+/* Popup achtergrond */
+.status-modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px); /* geeft een mooi blur-effect */
+}
+
+/* Popup venster */
+.status-modal-content {
+    background-color: #fff;
+    margin: 12% auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    animation: popupFadeIn 0.3s ease;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Animatie bij openen */
+@keyframes popupFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Sluitknop */
+.close {
+    color: #888;
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.close:hover { color: #333; }
+
+/* Optielijst binnen popup */
+.status-select {
+    display: block;
+    margin-top: 15px;
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.status-select:focus {
+    border-color: #2196f3;
+    box-shadow: 0 0 5px rgba(33,150,243,0.4);
+}
+
+
+
+
+
+/* Overlay achtergrond */
+.status-modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+}
+
+/* Popup venster */
+.status-modal-content {
+    background: #fff;
+    margin: 10% auto;
+    padding: 25px 30px;
+    border-radius: 14px;
+    width: 340px;
+    max-width: 90%;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    animation: modalFadeIn 0.3s ease;
+    font-family: "Segoe UI", sans-serif;
+    position: relative;
+}
+
+/* Animatie */
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-25px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Sluitknop */
+.close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    color: #888;
+    font-size: 26px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.close:hover { color: #333; }
+
+/* Form labels */
+.status-modal-content label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 15px;
+}
+
+/* Radio input netjes */
+.status-modal-content input[type="radio"] {
+    accent-color: #2196f3;
+    transform: scale(1.2);
+}
+
+/* Hover effect */
+.status-modal-content label:hover {
+    background: #f7f7f7;
+}
+
+/* Opslaan knop */
+.status-modal-content button {
+    width: 100%;
+    padding: 12px;
+    background: #2196f3;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.status-modal-content button:hover {
+    background: #1976d2;
+}
+
+.status-modal-content button:active {
+    transform: scale(0.98);
+}
+
+/* Kleurcodes naast opties */
+.status-aanwezig-label   { border-left: 6px solid #4caf50; }  /* groen */
+.status-afwezig-label    { border-left: 6px solid #f44336; }  /* rood */
+.status-ziek-label       { border-left: 6px solid #ffeb3b; }  /* geel */
+.status-opdeschool-label { border-left: 6px solid #2196f3; }  /* blauw */
+.status-eef-label        { border-left: 6px solid #ff9800; }  /* oranje */

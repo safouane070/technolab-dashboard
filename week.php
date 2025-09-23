@@ -67,52 +67,8 @@ $dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
 
 
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/week.css" />
 </head>
-<style>
-    .status-dot {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .status-aanwezig { background-color: #4caf50; }   /* groen */
-    .status-afwezig { background-color: #f44336; }    /* rood */
-    .status-ziek { background-color: #ffeb3b; }       /* geel */
-    .status-opdeschool { background-color: #2196f3; } /* blauw */
-    .status-eefetjesafwezig { background-color: #ff9800; } /* oranje */
-
-    .status-select {
-        display: none;
-        margin-top: 5px;
-    }
-    .status-modal {
-        display: none;
-        position: fixed;
-        z-index: 999;
-        left: 0; top: 0; width: 100%; height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-    }
-
-    .status-modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 300px;
-        border-radius: 10px;
-    }
-
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 24px;
-        cursor: pointer;
-    }
-    .close:hover { color: black; }
-</style>
 <body>
   <div class="app">
 
@@ -224,7 +180,7 @@ $dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
                                               <input type="radio" name="status" value="Op de school" <?= $status=='Op de school' ? 'checked' : '' ?>> Op de school
                                           </label><br>
                                           <label>
-                                              <input type="radio" name="status" value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig' ? 'checked' : '' ?>> Eefetjes Afwezig
+                                              <input type="radio" name="status" value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig' ? 'checked' : '' ?>> Tijdelijk Afwezig
                                           </label><br><br>
                                           <button type="submit">Opslaan</button>
                                       </form>
