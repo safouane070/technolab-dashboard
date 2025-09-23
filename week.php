@@ -45,6 +45,14 @@ $weekDays = [
     'Do' => ['col' => 'status_do', 'date' => (clone $startOfWeek)->modify('+3 day')],
     'Vr' => ['col' => 'status_vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
 ];
+// Werknemers ophalen
+$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Huidige weekdagen
+$dagen = ['ma', 'di', 'wo', 'do', 'vr'];
+$dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,6 +87,31 @@ $weekDays = [
         display: none;
         margin-top: 5px;
     }
+    .status-modal {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        left: 0; top: 0; width: 100%; height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .status-modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 300px;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .close:hover { color: black; }
 </style>
 <body>
   <div class="app">
@@ -109,12 +142,14 @@ $weekDays = [
       <div class="main-header">
         <h1>Absence List</h1>
         <div class="legend">
-          <div><span class="dot green"></span> Present</div>
-          <div><span class="dot red"></span> Absent</div>
-          <div><span class="dot yellow"></span> Planned</div>
-          <button class="primary-btn">
-            <span class="material-symbols-outlined">add</span> Add Absence
-          </button>
+
+                <div><span class="dot status-aanwezig"></span> Aanwezig</div>
+                <div><span class="dot status-afwezig"></span> Afwezig</div>
+                <div><span class="dot status-ziek"></span> Ziek</div>
+                <div><span class="dot status-opdeschool"></span> Op de school</div>
+                <div><span class="dot status-eefetjesafwezig"></span> Tijdelijk Afwezig</div>
+
+
         </div>
       </div>
 
@@ -159,7 +194,7 @@ $weekDays = [
               <tbody>
               <?php foreach ($werknemers as $w): ?>
                   <tr>
-                      <td><?= htmlspecialchars($w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam']) ?></td>
+                      <td><?= ($w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam']) ?></td>
                       <?php foreach ($weekDays as $dayName => $info): ?>
                           <?php
                           $col = $info['col'];
@@ -167,21 +202,34 @@ $weekDays = [
                           $class = 'status-'.strtolower(str_replace(' ', '', $status));
                           ?>
                           <td>
-                              <!-- Ronde bolletje -->
-                              <div class="status-dot <?= $class ?>" onclick="toggleSelect(this)"></div>
 
-                              <!-- Dropdown (verstopt) -->
-                              <form method="post" action="">
-                                  <select class="status-select" name="status" onchange="this.form.submit()">
-                                      <option value="Aanwezig" <?= $status=='Aanwezig' ? 'selected' : '' ?>>Aanwezig</option>
-                                      <option value="Afwezig" <?= $status=='Afwezig' ? 'selected' : '' ?>>Afwezig</option>
-                                      <option value="Ziek" <?= $status=='Ziek' ? 'selected' : '' ?>>Ziek</option>
-                                      <option value="Op de school" <?= $status=='Op de school' ? 'selected' : '' ?>>Op de school</option>
-                                      <option value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig' ? 'selected' : '' ?>>Eefetjes Afwezig</option>
-                                  </select>
-                                  <input type="hidden" name="id" value="<?= $w['id'] ?>">
-                                  <input type="hidden" name="dag" value="<?= $col ?>">
-                              </form>
+                              <div class="status-dot <?= $class ?>" onclick="openStatusModal(<?= $w['id'] ?>, '<?= $col ?>')"></div>
+
+                              <div id="modal-<?= $w['id'] ?>-<?= $col ?>" class="status-modal">
+                                  <div class="status-modal-content">
+                                      <span class="close" onclick="closeStatusModal(<?= $w['id'] ?>, '<?= $col ?>')">&times;</span>
+                                      <form method="post" action="">
+                                          <input type="hidden" name="id" value="<?= $w['id'] ?>">
+                                          <input type="hidden" name="dag" value="<?= $col ?>">
+                                          <label>
+                                              <input type="radio" name="status" value="Aanwezig" <?= $status=='Aanwezig' ? 'checked' : '' ?>> Aanwezig
+                                          </label><br>
+                                          <label>
+                                              <input type="radio" name="status" value="Afwezig" <?= $status=='Afwezig' ? 'checked' : '' ?>> Afwezig
+                                          </label><br>
+                                          <label>
+                                              <input type="radio" name="status" value="Ziek" <?= $status=='Ziek' ? 'checked' : '' ?>> Ziek
+                                          </label><br>
+                                          <label>
+                                              <input type="radio" name="status" value="Op de school" <?= $status=='Op de school' ? 'checked' : '' ?>> Op de school
+                                          </label><br>
+                                          <label>
+                                              <input type="radio" name="status" value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig' ? 'checked' : '' ?>> Eefetjes Afwezig
+                                          </label><br><br>
+                                          <button type="submit">Opslaan</button>
+                                      </form>
+                                  </div>
+                              </div>
                           </td>
                       <?php endforeach; ?>
                   </tr>
@@ -193,10 +241,25 @@ $weekDays = [
 
     </main>
   </div>
+
+
   <script>
-      function toggleSelect(dot) {
-          const select = dot.nextElementSibling.querySelector("select");
-          select.style.display = (select.style.display === "block") ? "none" : "block";
+      function openStatusModal(id, dag) {
+          document.getElementById(`modal-${id}-${dag}`).style.display = "block";
+      }
+
+      function closeStatusModal(id, dag) {
+          document.getElementById(`modal-${id}-${dag}`).style.display = "none";
+      }
+
+
+      window.onclick = function(event) {
+          const modals = document.querySelectorAll('.status-modal');
+          modals.forEach(modal => {
+              if (event.target == modal) {
+                  modal.style.display = "none";
+              }
+          });
       }
   </script>
 </body>

@@ -38,15 +38,15 @@ $dagen = [
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Details van <?= htmlspecialchars($volledigeNaam) ?></title>
+    <title>Details van <?= ($volledigeNaam) ?></title>
     <link rel="stylesheet" href="css/details.css">
 </head>
 <body>
 
     <div class="card">
-        <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
+        <h2><?= ($volledigeNaam) ?></h2>
 
-        <p><strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
+        <p><strong>Email:</strong> <?= ($werknemer['email']) ?></p>
 
         <p><strong>Status:</strong>
             <span class="status
@@ -56,11 +56,11 @@ $dagen = [
                 <?= $werknemer['status']=='Op de school' ? 'status-opdeschool' : '' ?>
                 <?= $werknemer['status']=='Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
             ">
-                <?= htmlspecialchars($werknemer['status']) ?>
+                <?= ($werknemer['status']) ?>
             </span>
         </p>
 
-        <p><strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
+        <p><strong>Sector:</strong> <?= ($werknemer['sector']) ?></p>
 
         <p><strong>BHV:</strong>
             <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
