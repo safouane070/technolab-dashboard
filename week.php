@@ -1,3 +1,36 @@
+<?php
+try {
+    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Fout!: " . $e->getMessage());
+}
+
+
+$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+$today = new DateTime();
+$weekStart = (clone $today)->modify('monday this week');
+$weekDays = [];
+for ($i = 0; $i < 7; $i++) {
+    $day = (clone $weekStart)->modify("+$i day");
+    $weekDays[] = $day;
+}
+
+function statusClass($status) {
+    switch ($status) {
+        case 'Aanwezig': return 'green';
+        case 'Afwezig': return 'red';
+        case 'Ziek': return 'yellow';
+        case 'Op de school': return 'blue';
+        case 'Eefetjes Afwezig': return 'orange';
+        default: return '';
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,13 +38,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Absence Tracker</title>
 
-  <!-- Fonts -->
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-  <!-- Custom CSS -->
+
   <link rel="stylesheet" href="css/style.css" />
 </head>
+<style>
+    .cell { width: 50px; height: 50px; border-radius: 50%; margin: auto; }
+    .green { background: #00e604; }
+    .red { background: #f8001f; }
+    .yellow { background: #ffcf11; }
+    .blue { background: #bbdefb; }
+    .orange { background: #e68a00; }
+    .weekend { background: #f5f5f5; }
+</style>
 <body>
   <div class="app">
 
@@ -33,11 +75,7 @@
         <a href="#">Reports</a>
       </nav>
       <div class="header-right">
-        <button class="icon-button">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <img alt="User avatar" class="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmQf2vygWEjWviZ9ns2f4aSSvopGZE_WGG6LFfdymZs3GNRL9bGxgSTl4D0SgC1mfhCkYEnaSbaEoznHIUlfvzCcPhwjdPCqO5DEcYVICNYLP6daKQecjcpnR7yAqkLR-QSsAWdvJ51xF37rhgul5qEpD3fk2EqfjGj4aSd6RZGr63JJv4T3iaZw2oI0NfONTWxexvOns6EHeM8FR7hew_h3axBllD6hKj38EOugX_OlXH54YeJhfbmFiOInJ_5HWIb2id8Ho0SNA" />
-      </div>
+              </div>
     </header>
 
     <!-- Main -->
@@ -80,46 +118,42 @@
       <!-- Table -->
       <div class="table-wrapper">
         <table>
-          <thead>
+            <thead>
             <tr>
-              <th>Employee</th>
-              <th>Mon<br>21</th>
-              <th>Tue<br>22</th>
-              <th>Wed<br>23</th>
-              <th>Thu<br>24</th>
-              <th>Fri<br>25</th>
-              <th class="weekend">Sat<br>26</th>
-              <th class="weekend">Sun<br>27</th>
+                <th>Werknemer</th>
+                <?php foreach ($weekDays as $day): ?>
+                    <th <?= in_array($day->format('N'), [6,7]) ? 'class="weekend"' : '' ?>>
+                        <?= $day->format('D') ?><br><?= $day->format('d M') ?>
+                    </th>
+                <?php endforeach; ?>
             </tr>
-          </thead>
+            </thead>
           <tbody>
-            <tr>
-              <td>Sophia Carter</td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell red"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td></td><td></td>
-            </tr>
-            <tr>
-              <td>Ethan Bennett</td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell yellow"></div></td>
-              <td><div class="cell yellow"></div></td>
-              <td></td><td></td>
-            </tr>
-            <tr>
-              <td>Olivia Harper</td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell green"></div></td>
-              <td><div class="cell red"></div></td>
-              <td></td><td></td>
-            </tr>
+          <?php foreach ($werknemers as $w): ?>
+              <tr>
+                  <td><?= ($w['voornaam'] . ' ' . ($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '') . $w['achternaam']) ?></td>
+                  <?php foreach ($weekDays as $day): ?>
+                      <?php
+                      $dayName = strtolower($day->format('D'));
+                      $status = 'Afwezig';
+
+
+                      if (
+                          ($dayName == 'mon' && $w['werkdag_ma']) ||
+                          ($dayName == 'tue' && $w['werkdag_di']) ||
+                          ($dayName == 'wed' && $w['werkdag_wo']) ||
+                          ($dayName == 'thu' && $w['werkdag_do']) ||
+                          ($dayName == 'fri' && $w['werkdag_vr'])
+                      ) {
+                          $status = $w['status'];
+                      }
+                      ?>
+                      <td>
+                          <div class="cell <?= statusClass($status) ?>"></div>
+                      </td>
+                  <?php endforeach; ?>
+              </tr>
+          <?php endforeach; ?>
           </tbody>
         </table>
       </div>

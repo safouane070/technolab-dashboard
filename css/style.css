@@ -115,15 +115,7 @@ body {
   height: 1rem;
   border-radius: 9999px;
 }
-.dot.green {
-  background: #4ade80;
-}
-.dot.red {
-  background: #f87171;
-}
-.dot.yellow {
-  background: #facc15;
-}
+
 
 .primary-btn {
   display: flex;
@@ -256,24 +248,7 @@ td:first-child {
   margin: 0 auto;
   cursor: pointer;
 }
-.cell.green {
-  background: #dcfce7;
-}
-.cell.green:hover {
-  background: #bbf7d0;
-}
-.cell.red {
-  background: #fee2e2;
-}
-.cell.red:hover {
-  background: #fecaca;
-}
-.cell.yellow {
-  background: #fef9c3;
-}
-.cell.yellow:hover {
-  background: #fef08a;
-}
+
 
 /* === Details Card (werknemer) === */
 .card {
@@ -313,26 +288,7 @@ td:first-child {
   font-size: 14px;
   display: inline-block;
 }
-.status-aanwezig {
-  background: #4ade80;
-  color: #065f46;
-}
-.status-afwezig {
-  background: #f87171;
-  color: #7f1d1d;
-}
-.status-ziek {
-  background: #facc15;
-  color: #78350f;
-}
-.status-opdeschool {
-  background: #60a5fa;
-  color: #1e3a8a;
-}
-.status-eefetjes {
-  background: #c084fc;
-  color: #581c87;
-}
+
 
 /* === BHV === */
 .bhv {
