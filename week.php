@@ -6,31 +6,46 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
+// Status bijwerken voor een specifieke dag
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
+    $dag = $_POST['dag'];
+    $toegestaneVelden = ['status_ma','status_di','status_wo','status_do','status_vr'];
+    if (in_array($dag, $toegestaneVelden)) {
+        $stmt = $db->prepare("UPDATE werknemers SET $dag = :status WHERE id = :id");
+        $stmt->execute([
+            ':status' => $_POST['status'],
+            ':id' => intval($_POST['id'])
+        ]);
+    }
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
 
+// Werknemers ophalen
 $stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Dagen van de week
+$weekDays = [
+    'Ma' => 'status_ma',
+    'Di' => 'status_di',
+    'Wo' => 'status_wo',
+    'Do' => 'status_do',
+    'Vr' => 'status_vr',
+];
 
-$today = new DateTime();
-$weekStart = (clone $today)->modify('monday this week');
-$weekDays = [];
-for ($i = 0; $i < 7; $i++) {
-    $day = (clone $weekStart)->modify("+$i day");
-    $weekDays[] = $day;
-}
+// Huidige week berekenen (maandag t/m vrijdag)
+$startOfWeek = new DateTime();
+$startOfWeek->modify(('Monday' == $startOfWeek->format('l')) ? 'this monday' : 'last monday');
 
-function statusClass($status) {
-    switch ($status) {
-        case 'Aanwezig': return 'green';
-        case 'Afwezig': return 'red';
-        case 'Ziek': return 'yellow';
-        case 'Op de school': return 'blue';
-        case 'Eefetjes Afwezig': return 'orange';
-        default: return '';
-    }
-}
+$weekDays = [
+    'Ma' => ['col' => 'status_ma', 'date' => clone $startOfWeek],
+    'Di' => ['col' => 'status_di', 'date' => (clone $startOfWeek)->modify('+1 day')],
+    'Wo' => ['col' => 'status_wo', 'date' => (clone $startOfWeek)->modify('+2 day')],
+    'Do' => ['col' => 'status_do', 'date' => (clone $startOfWeek)->modify('+3 day')],
+    'Vr' => ['col' => 'status_vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
+];
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,13 +61,24 @@ function statusClass($status) {
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <style>
-    .cell { width: 50px; height: 50px; border-radius: 50%; margin: auto; }
-    .green { background: #00e604; }
-    .red { background: #f8001f; }
-    .yellow { background: #ffcf11; }
-    .blue { background: #bbdefb; }
-    .orange { background: #e68a00; }
-    .weekend { background: #f5f5f5; }
+    .status-dot {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .status-aanwezig { background-color: #4caf50; }   /* groen */
+    .status-afwezig { background-color: #f44336; }    /* rood */
+    .status-ziek { background-color: #ffeb3b; }       /* geel */
+    .status-opdeschool { background-color: #2196f3; } /* blauw */
+    .status-eefetjesafwezig { background-color: #ff9800; } /* oranje */
+
+    .status-select {
+        display: none;
+        margin-top: 5px;
+    }
 </style>
 <body>
   <div class="app">
@@ -117,48 +143,62 @@ function statusClass($status) {
 
       <!-- Table -->
       <div class="table-wrapper">
-        <table>
-            <thead>
-            <tr>
-                <th>Werknemer</th>
-                <?php foreach ($weekDays as $day): ?>
-                    <th <?= in_array($day->format('N'), [6,7]) ? 'class="weekend"' : '' ?>>
-                        <?= $day->format('D') ?><br><?= $day->format('d M') ?>
-                    </th>
-                <?php endforeach; ?>
-            </tr>
-            </thead>
-          <tbody>
-          <?php foreach ($werknemers as $w): ?>
+
+
+          <table>
+              <thead>
               <tr>
-                  <td><?= ($w['voornaam'] . ' ' . ($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '') . $w['achternaam']) ?></td>
-                  <?php foreach ($weekDays as $day): ?>
-                      <?php
-                      $dayName = strtolower($day->format('D'));
-                      $status = 'Afwezig';
-
-
-                      if (
-                          ($dayName == 'mon' && $w['werkdag_ma']) ||
-                          ($dayName == 'tue' && $w['werkdag_di']) ||
-                          ($dayName == 'wed' && $w['werkdag_wo']) ||
-                          ($dayName == 'thu' && $w['werkdag_do']) ||
-                          ($dayName == 'fri' && $w['werkdag_vr'])
-                      ) {
-                          $status = $w['status'];
-                      }
-                      ?>
-                      <td>
-                          <div class="cell <?= statusClass($status) ?>"></div>
-                      </td>
+                  <th>Werknemer</th>
+                  <?php foreach ($weekDays as $dayName => $info): ?>
+                      <th>
+                          <?= $dayName ?><br>
+                          <?= $info['date']->format('d/m') ?>
+                      </th>
                   <?php endforeach; ?>
               </tr>
-          <?php endforeach; ?>
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+              <?php foreach ($werknemers as $w): ?>
+                  <tr>
+                      <td><?= htmlspecialchars($w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam']) ?></td>
+                      <?php foreach ($weekDays as $dayName => $info): ?>
+                          <?php
+                          $col = $info['col'];
+                          $status = $w[$col];
+                          $class = 'status-'.strtolower(str_replace(' ', '', $status));
+                          ?>
+                          <td>
+                              <!-- Ronde bolletje -->
+                              <div class="status-dot <?= $class ?>" onclick="toggleSelect(this)"></div>
+
+                              <!-- Dropdown (verstopt) -->
+                              <form method="post" action="">
+                                  <select class="status-select" name="status" onchange="this.form.submit()">
+                                      <option value="Aanwezig" <?= $status=='Aanwezig' ? 'selected' : '' ?>>Aanwezig</option>
+                                      <option value="Afwezig" <?= $status=='Afwezig' ? 'selected' : '' ?>>Afwezig</option>
+                                      <option value="Ziek" <?= $status=='Ziek' ? 'selected' : '' ?>>Ziek</option>
+                                      <option value="Op de school" <?= $status=='Op de school' ? 'selected' : '' ?>>Op de school</option>
+                                      <option value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig' ? 'selected' : '' ?>>Eefetjes Afwezig</option>
+                                  </select>
+                                  <input type="hidden" name="id" value="<?= $w['id'] ?>">
+                                  <input type="hidden" name="dag" value="<?= $col ?>">
+                              </form>
+                          </td>
+                      <?php endforeach; ?>
+                  </tr>
+              <?php endforeach; ?>
+              </tbody>
+          </table>
+
       </div>
 
     </main>
   </div>
+  <script>
+      function toggleSelect(dot) {
+          const select = dot.nextElementSibling.querySelector("select");
+          select.style.display = (select.style.display === "block") ? "none" : "block";
+      }
+  </script>
 </body>
 </html>
