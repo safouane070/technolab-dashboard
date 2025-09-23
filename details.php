@@ -42,37 +42,44 @@ $dagen = [
     <link rel="stylesheet" href="css/details.css">
 </head>
 <body>
-<div class="card">
-    <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
-    <p><strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
-    <p><strong>Status:</strong>
-        <span class="status
-            <?= $werknemer['status']=='Aanwezig' ? 'status-aanwezig' : '' ?>
-            <?= $werknemer['status']=='Afwezig' ? 'status-afwezig' : '' ?>
-            <?= $werknemer['status']=='Ziek' ? 'status-ziek' : '' ?>
-            <?= $werknemer['status']=='Op de school' ? 'status-opdeschool' : '' ?>
-            <?= $werknemer['status']=='Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
-        ">
-            <?= htmlspecialchars($werknemer['status']) ?>
-        </span>
-    </p>
-    <p><strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
-    <p><strong>BHV:</strong>
-        <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
-            <?= $werknemer['BHV'] ? 'Ja' : 'Nee' ?>
-        </span>
-    </p>
-    <p><strong>Werkdagen:</strong></p>
-    <div class="werkdagen">
-        <?php foreach ($dagen as $afkorting => $naam): ?>
-            <?php $isWerkdag = $werknemer['werkdag_' . $afkorting]; ?>
-            <span class="werkdag <?= $isWerkdag ? 'active' : 'inactive' ?>">
-                <?= $naam ?>
+
+    <div class="card">
+        <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
+
+        <p><strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
+
+        <p><strong>Status:</strong>
+            <span class="status
+                <?= $werknemer['status']=='Aanwezig' ? 'status-aanwezig' : '' ?>
+                <?= $werknemer['status']=='Afwezig' ? 'status-afwezig' : '' ?>
+                <?= $werknemer['status']=='Ziek' ? 'status-ziek' : '' ?>
+                <?= $werknemer['status']=='Op de school' ? 'status-opdeschool' : '' ?>
+                <?= $werknemer['status']=='Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
+            ">
+                <?= htmlspecialchars($werknemer['status']) ?>
             </span>
-        <?php endforeach; ?>
+        </p>
+
+        <p><strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
+
+        <p><strong>BHV:</strong>
+            <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
+                <?= $werknemer['BHV'] ? 'Ja' : 'Nee' ?>
+            </span>
+        </p>
+
+        <p><strong>Werkdagen:</strong></p>
+        <div class="werkdagen">
+            <?php foreach ($dagen as $afkorting => $naam): ?>
+                <?php $isWerkdag = $werknemer['werkdag_' . $afkorting]; ?>
+                <span class="werkdag <?= $isWerkdag ? 'active' : 'inactive' ?>">
+                    <?= $naam ?>
+                </span>
+            <?php endforeach; ?>
+        </div>
+
+        <br>
+        <a href="dagplanning.php" class="back-link">← Terug naar lijst</a>
     </div>
-    <br>
-    <a href="dagplanning.php" class="back-link">← Terug naar lijst</a>
-</div>
 </body>
 </html>

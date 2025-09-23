@@ -16,18 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sector = $_POST['sector'];
     $bhv = isset($_POST['bhv']) ? 1 : 0;
 
-    // Werkdagen
     $werkdag_ma = isset($_POST['werkdag_ma']) ? 1 : 0;
     $werkdag_di = isset($_POST['werkdag_di']) ? 1 : 0;
     $werkdag_wo = isset($_POST['werkdag_wo']) ? 1 : 0;
     $werkdag_do = isset($_POST['werkdag_do']) ? 1 : 0;
     $werkdag_vr = isset($_POST['werkdag_vr']) ? 1 : 0;
 
-    // Automatische status
-    $status = "Afwezig";
-    if ($werkdag_ma || $werkdag_di || $werkdag_wo || $werkdag_do || $werkdag_vr) {
-        $status = "Aanwezig";
-    }
+    $status = ($werkdag_ma || $werkdag_di || $werkdag_wo || $werkdag_do || $werkdag_vr) ? "Aanwezig" : "Afwezig";
 
     $stmt = $db->prepare("INSERT INTO werknemers 
         (voornaam, tussenvoegsel, achternaam, email, werkdag_ma, werkdag_di, werkdag_wo, werkdag_do, werkdag_vr, sector, BHV, status) 
@@ -56,50 +51,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nieuwe medewerker toevoegen</title>
-    <style>
-        form { width: 400px; margin: 20px auto; display: flex; flex-direction: column; gap: 10px; }
-        label { font-weight: bold; }
-        input, select { padding: 6px; }
-        button { padding: 10px; background: green; color: white; border: none; cursor: pointer; }
-        button:hover { background: darkgreen; }
-    </style>
+    <link rel="stylesheet" href="css/add.css">
 </head>
 <body>
-<h2 style="text-align:center;">Nieuwe medewerker toevoegen</h2>
-<form method="post">
-    <label>Voornaam:</label>
-    <input type="text" name="voornaam" required>
+<div class="container">
+    <h2>Nieuwe medewerker toevoegen</h2>
+    <form method="post">
+        <label>Voornaam:</label>
+        <input type="text" name="voornaam" required>
 
-    <label>Tussenvoegsel:</label>
-    <input type="text" name="tussenvoegsel">
+        <label>Tussenvoegsel:</label>
+        <input type="text" name="tussenvoegsel">
 
-    <label>Achternaam:</label>
-    <input type="text" name="achternaam" required>
+        <label>Achternaam:</label>
+        <input type="text" name="achternaam" required>
 
-    <label>Email:</label>
-    <input type="email" name="email" required>
+        <label>Email:</label>
+        <input type="email" name="email" required>
 
-    <label>Werkdagen:</label>
-    <input type="checkbox" name="werkdag_ma"> Maandag <br>
-    <input type="checkbox" name="werkdag_di"> Dinsdag <br>
-    <input type="checkbox" name="werkdag_wo"> Woensdag <br>
-    <input type="checkbox" name="werkdag_do"> Donderdag <br>
-    <input type="checkbox" name="werkdag_vr"> Vrijdag <br>
+        <label>Werkdagen:</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="werkdag_ma"> Maandag</label>
+            <label><input type="checkbox" name="werkdag_di"> Dinsdag</label>
+            <label><input type="checkbox" name="werkdag_wo"> Woensdag</label>
+            <label><input type="checkbox" name="werkdag_do"> Donderdag</label>
+            <label><input type="checkbox" name="werkdag_vr"> Vrijdag</label>
+        </div>
 
-    <label>Sector:</label>
-    <select name="sector" required>
-        <option value="Techniek">Techniek</option>
-        <option value="ICT">ICT</option>
-        <option value="Onderwijs">Onderwijs</option>
-        <option value="Administratie">Administratie</option>
-    </select>
+        <label>Sector:</label>
+        <select name="sector" required>
+            <option value="Techniek">Techniek</option>
+            <option value="ICT">ICT</option>
+            <option value="Onderwijs">Onderwijs</option>
+            <option value="Administratie">Administratie</option>
+        </select>
 
-    <label>BHV:</label>
-    <input type="checkbox" name="bhv"> Heeft BHV
+        <label><input type="checkbox" name="bhv"> Heeft BHV</label>
 
-    <button type="submit">Opslaan</button>
-</form>
-<p style="text-align:center;"><a href="dagplanning.php">⬅ Terug naar lijst</a></p>
+        <button type="submit">Opslaan</button>
+    </form>
+    <a href="dagplanning.php" class="back-link">⬅ Terug naar lijst</a>
+</div>
 </body>
 </html>

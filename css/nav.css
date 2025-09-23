@@ -17,13 +17,14 @@ body {
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 /* Header */
 .header {
   position: sticky;
   top: 0;
+  width: 100%;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -31,7 +32,7 @@ body {
   height: 4rem;
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 /* Logo */
@@ -44,27 +45,25 @@ body {
 .logo-icon {
   width: 10rem;
   height: 2rem;
-  color: #2563eb;
-}
-
-.logo-text {
-  font-size: 1.25rem;
-  font-weight: 600;
+  object-fit: contain;
 }
 
 /* Navigation */
 .nav {
   display: flex;
-  align-items: center; /* vertical centering */
+  align-items: center;
   gap: 2rem;
   font-size: 0.875rem;
   font-weight: 500;
+
+  flex: 1;                 /* neemt alle beschikbare ruimte */
+  justify-content: center; /* centreert de links */
 }
 
 .nav a {
   color: #6b7280;
   text-decoration: none;
-  padding: 0.5rem 0; /* vergroot klikbaar gebied */
+  padding: 0.5rem 0;
   transition: color 0.2s;
 }
 
@@ -75,10 +74,10 @@ body {
 .nav .active {
   font-weight: 600;
   color: #2563eb;
-  border-bottom: 2px solid #2563eb; /* visuele indicatie actieve link */
+  border-bottom: 2px solid #2563eb;
 }
 
-/* User actions (iconen rechts) */
+/* User actions */
 .user-actions {
   display: flex;
   gap: 1rem;
@@ -96,10 +95,4 @@ body {
 
 .icon-btn:hover {
   background: #f3f4f6;
-}
-
-.avatar {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
 }
