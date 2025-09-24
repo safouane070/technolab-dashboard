@@ -35,7 +35,7 @@
       <nav class="nav" aria-label="Main Navigation">
         <a href="dagplanning.php" class="active">Dashboard</a>
         <a href="#">Employees</a>
-        <a href="absent.php">Absences</a>
+        <a href="#">Absences</a>
         <a href="#">Reports</a>
       </nav>
 

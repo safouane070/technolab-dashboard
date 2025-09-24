@@ -89,10 +89,10 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <input type="text" id="search" placeholder="Zoek op naam...">
                 </div>
                 <div class="toggle-group">
-                    <button class="toggle active">Today</button>
+                    <button class="toggle active">Vandaag</button>
                     <a href="week.php"><button class="toggle">Week</button></a>
                 </div>
-                <button class="btn-secondary"><span class="material-symbols-outlined"></span> Reset</button>
+
             </div>
         </div>
 
