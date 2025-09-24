@@ -6,64 +6,46 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
+// Week offset (0 = deze week, +1 volgende week, -1 vorige week)
+$weekOffset = isset($_GET['week']) ? intval($_GET['week']) : 0;
+$startOfWeek = new DateTime();
+$startOfWeek->modify("monday this week");
+if ($weekOffset !== 0) {
+    $startOfWeek->modify(($weekOffset > 0 ? '+' : '') . $weekOffset . ' week');
+}
+$jaar = $startOfWeek->format("o");
+$weeknummer = $startOfWeek->format("W");
 
-
+// Opslaan van status
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
-    $dag = $_POST['dag'];
-    $toegestaneVelden = ['status_ma','status_di','status_wo','status_do','status_vr'];
-    if (in_array($dag, $toegestaneVelden)) {
-        $stmt = $db->prepare("UPDATE werknemers SET $dag = :status WHERE id = :id");
-        $stmt->execute([
-            ':status' => $_POST['status'],
-            ':id' => intval($_POST['id'])
-        ]);
-    }
-    header("Location: " . $_SERVER['PHP_SELF']);
+    $stmt = $db->prepare("
+        INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
+        VALUES (:id, :week, :jaar, :dag, :status)
+        ON DUPLICATE KEY UPDATE status = VALUES(status)
+    ");
+    $stmt->execute([
+        ':id' => intval($_POST['id']),
+        ':week' => $weeknummer,
+        ':jaar' => $jaar,
+        ':dag' => $_POST['dag'],
+        ':status' => $_POST['status']
+    ]);
+    header("Location: " . $_SERVER['PHP_SELF'] . "?week=$weekOffset");
     exit;
 }
 
-
-
+// Werknemers ophalen
 $stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Dagen van de week
+// Weekdagen
 $weekDays = [
-    'Ma' => 'status_ma',
-    'Di' => 'status_di',
-    'Wo' => 'status_wo',
-    'Do' => 'status_do',
-    'Vr' => 'status_vr',
+    'Ma' => ['col' => 'ma', 'date' => clone $startOfWeek],
+    'Di' => ['col' => 'di', 'date' => (clone $startOfWeek)->modify('+1 day')],
+    'Wo' => ['col' => 'wo', 'date' => (clone $startOfWeek)->modify('+2 day')],
+    'Do' => ['col' => 'do', 'date' => (clone $startOfWeek)->modify('+3 day')],
+    'Vr' => ['col' => 'vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
 ];
-
-// Huidige week berekenen (maandag t/m vrijdag)
-$startOfWeek = new DateTime();
-$startOfWeek->modify(('Monday' == $startOfWeek->format('l')) ? 'this monday' : 'last monday');
-
-
-$weekDays = [
-    'Ma' => 'status_ma',
-    'Di' => 'status_di',
-    'Wo' => 'status_wo',
-    'Do' => 'status_do',
-    'Vr' => 'status_vr',
-];
-
-
-
-$startOfWeek = new DateTime();
-$startOfWeek->modify(( 'Monday' == $startOfWeek->format('l')) ? 'this monday' : 'last monday');
-$weekDays = [
-    'Ma' => ['col' => 'status_ma', 'date' => clone $startOfWeek],
-    'Di' => ['col' => 'status_di', 'date' => (clone $startOfWeek)->modify('+1 day')],
-    'Wo' => ['col' => 'status_wo', 'date' => (clone $startOfWeek)->modify('+2 day')],
-    'Do' => ['col' => 'status_do', 'date' => (clone $startOfWeek)->modify('+3 day')],
-    'Vr' => ['col' => 'status_vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
-];
-
-// Huidige weekdagen
-$dagen = ['ma', 'di', 'wo', 'do', 'vr'];
-$dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -126,17 +108,14 @@ $dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
                     <button class="active">Week</button>
                 </div>
 
-                <!-- Reset knop -->
-                <button class="reset-btn" style="margin-left: 10px;">
-                    <span class="material-symbols-outlined">refresh</span> Reset
-                </button>
+
+            </div>
+            <div class="filter-right">
+                <a href="?week=<?= $weekOffset-1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button></a>
+                <span class="date-label"><?= $startOfWeek->format('d M Y') ?> - <?= (clone $startOfWeek)->modify('+4 days')->format('d M Y') ?></span>
+                <a href="?week=<?= $weekOffset+1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button></a>
             </div>
 
-            <div class="filter-right">
-                <button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span class="date-label"><?= $startOfWeek->format('F d') ?> - <?= (clone $startOfWeek)->modify('+4 day')->format('F d, Y') ?></span>
-                <button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>
         </div>
 
 
@@ -156,16 +135,26 @@ $dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
                 </thead>
                 <tbody>
                 <?php foreach ($werknemers as $w): ?>
+                    <?php
+
+                    $stmt = $db->prepare("SELECT dag, status FROM week_planning WHERE werknemer_id = :id AND weeknummer = :week AND jaar = :jaar");
+                    $stmt->execute([':id'=>$w['id'], ':week'=>$weeknummer, ':jaar'=>$jaar]);
+                    $weekStatussen = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                    ?>
                     <tr>
-                        <td class="werknemer-naam"><?= ($w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam']) ?></td>
+                        <td><?= $w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam'] ?></td>
                         <?php foreach ($weekDays as $dayName => $info): ?>
-                            <?php $col = $info['col']; $status = $w[$col]; $class = 'status-'.strtolower(str_replace(' ', '', $status)); ?>
+                            <?php
+                            $col = $info['col'];
+                            $status = $weekStatussen[$col] ?? 'Afwezig';
+                            $class = 'status-'.strtolower(str_replace(' ', '', $status));
+                            ?>
                             <td>
                                 <div class="status-dot <?= $class ?>" onclick="openStatusModal(<?= $w['id'] ?>, '<?= $col ?>')"></div>
                                 <div id="modal-<?= $w['id'] ?>-<?= $col ?>" class="status-modal">
                                     <div class="status-modal-content">
                                         <span class="close" onclick="closeStatusModal(<?= $w['id'] ?>, '<?= $col ?>')">&times;</span>
-                                        <form method="post" action="">
+                                        <form method="post">
                                             <input type="hidden" name="id" value="<?= $w['id'] ?>">
                                             <input type="hidden" name="dag" value="<?= $col ?>">
                                             <label><input type="radio" name="status" value="Aanwezig" <?= $status=='Aanwezig' ? 'checked' : '' ?>> Aanwezig</label><br>
