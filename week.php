@@ -102,22 +102,18 @@ $weekDays = [
                     <input type="text" id="searchInput" placeholder="Zoek op naam..." />
                 </div>
 
-                <!-- Today / Week knoppen naast zoekveld -->
+                <!-- Today / Week knoppen -->
                 <div class="range-buttons" style="display: flex; gap: 5px;">
                     <a href="dagplanning.php"><button class="toggle">Today</button></a>
                     <button class="active">Week</button>
                 </div>
-
-
             </div>
             <div class="filter-right">
                 <a href="?week=<?= $weekOffset-1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button></a>
                 <span class="date-label"><?= $startOfWeek->format('d M Y') ?> - <?= (clone $startOfWeek)->modify('+4 days')->format('d M Y') ?></span>
                 <a href="?week=<?= $weekOffset+1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button></a>
             </div>
-
         </div>
-
 
         <!-- Table -->
         <div class="table-wrapper">
@@ -136,13 +132,12 @@ $weekDays = [
                 <tbody>
                 <?php foreach ($werknemers as $w): ?>
                     <?php
-
                     $stmt = $db->prepare("SELECT dag, status FROM week_planning WHERE werknemer_id = :id AND weeknummer = :week AND jaar = :jaar");
                     $stmt->execute([':id'=>$w['id'], ':week'=>$weeknummer, ':jaar'=>$jaar]);
                     $weekStatussen = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
                     ?>
                     <tr>
-                        <td><?= $w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam'] ?></td>
+                        <td class="werknemer-naam"><?= $w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam'] ?></td>
                         <?php foreach ($weekDays as $dayName => $info): ?>
                             <?php
                             $col = $info['col'];
@@ -175,29 +170,7 @@ $weekDays = [
         </div>
     </main>
 </div>
+<script src="js/week.js"></script>
 
-<script>
-    function openStatusModal(id, dag) {
-        document.getElementById(`modal-${id}-${dag}`).style.display = "block";
-    }
-    function closeStatusModal(id, dag) {
-        document.getElementById(`modal-${id}-${dag}`).style.display = "none";
-    }
-    window.onclick = function(event) {
-        const modals = document.querySelectorAll('.status-modal');
-        modals.forEach(modal => { if (event.target == modal) modal.style.display = "none"; });
-    }
-
-    // Live zoeken op naam
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', () => {
-        const filter = searchInput.value.toLowerCase();
-        const rows = document.querySelectorAll('#werknemerTable tbody tr');
-        rows.forEach(row => {
-            const naam = row.querySelector('.werknemer-naam').textContent.toLowerCase();
-            row.style.display = naam.includes(filter) ? '' : 'none';
-        });
-    });
-</script>
 </body>
 </html>

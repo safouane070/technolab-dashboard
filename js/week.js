@@ -1,5 +1,5 @@
+// Live zoeken
 document.addEventListener('DOMContentLoaded', () => {
-  // Live zoeken
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
     searchInput.addEventListener('input', () => {
@@ -14,3 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Modaal openen/sluiten
+function openStatusModal(id, dag) {
+    document.getElementById(`modal-${id}-${dag}`).style.display = 'block';
+}
+function closeStatusModal(id, dag) {
+    document.getElementById(`modal-${id}-${dag}`).style.display = 'none';
+}
