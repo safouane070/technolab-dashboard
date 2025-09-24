@@ -1,20 +1,16 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // Modal open/close
-    window.openStatusModal = function (id, dag) {
-        document.getElementById(`modal-${id}-${dag}`).style.display = "block";
-    };
+document.addEventListener('DOMContentLoaded', () => {
+  // Live zoeken
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const filter = searchInput.value.toLowerCase();
+      const rows = document.querySelectorAll('#werknemerTable tbody tr');
 
-    window.closeStatusModal = function (id, dag) {
-        document.getElementById(`modal-${id}-${dag}`).style.display = "none";
-    };
-
-    // Klik buiten modal om te sluiten
-    window.onclick = function (event) {
-        const modals = document.querySelectorAll(".status-modal");
-        modals.forEach((modal) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        });
-    };
+      rows.forEach(row => {
+        const naamCell = row.querySelector('.werknemer-naam');
+        const naam = naamCell ? naamCell.textContent.toLowerCase() : '';
+        row.style.display = naam.includes(filter) ? '' : 'none';
+      });
+    });
+  }
 });

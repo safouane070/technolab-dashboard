@@ -179,3 +179,25 @@
 .status-ziek-label       { border-left: 6px solid #ffeb3b; }  /* geel */
 .status-opdeschool-label { border-left: 6px solid #2196f3; }  /* blauw */
 .status-eef-label        { border-left: 6px solid #ff9800; }  /* oranje */
+
+
+
+/* Zoekbalk */
+.search-input {
+    position: relative;
+}
+
+.search-input input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 220px;
+    transition: border-color 0.2s;
+}
+
+.search-input input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0,123,255,0.3);
+}
