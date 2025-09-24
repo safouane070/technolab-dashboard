@@ -11,8 +11,12 @@ $daysMap = [1 => 'werkdag_ma', 2 => 'werkdag_di', 3 => 'werkdag_wo', 4 => 'werkd
 
 if ($today >= 1 && $today <= 5) {
     $column = $daysMap[$today];
-    $db->exec("UPDATE werknemers SET status = 'Afwezig' WHERE status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
-    $stmt = $db->prepare("UPDATE werknemers SET status = 'Aanwezig' WHERE $column = 1 AND status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
+    $db->exec("UPDATE werknemers SET status = 'Afwezig' 
+               WHERE status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
+    $stmt = $db->prepare("UPDATE werknemers 
+                          SET status = 'Aanwezig' 
+                          WHERE $column = 1 
+                          AND status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
     $stmt->execute();
 }
 
@@ -29,11 +33,13 @@ if (isset($_GET['delete'])) {
     $stmt->execute([':id' => $id]);
 }
 
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status 
+                    FROM werknemers 
+                    ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -66,15 +72,13 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </header>
 
     <main class="main">
-        <div class="page-header">
-            
-        </div>
+        <div class="page-header"></div>
 
         <div class="toolbar">
             <div class="toolbar-left">
-                <div class="date-input">
-                    <span class="material-symbols-outlined icon"></span>
-                    <input type="text" placeholder="Select Dates">
+                <!-- 🔎 Zoekveld op naam -->
+                <div class="search-input">
+                    <input type="text" id="search" placeholder="Zoek op naam...">
                 </div>
                 <div class="toggle-group">
                     <button class="toggle active">Today</button>
@@ -115,7 +119,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <option value="Afwezig" <?= $w['status']=='Afwezig'?'selected':'' ?>>Afwezig</option>
                                     <option value="Ziek" <?= $w['status']=='Ziek'?'selected':'' ?>>Ziek</option>
                                     <option value="Op de school" <?= $w['status']=='Op de school'?'selected':'' ?>>Op school</option>
-                                    <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>tijdelijk Afwezig</option>
+                                    <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
                                 </select>
                                 <input type="hidden" name="id" value="<?= $w['id'] ?>">
                             </form>
@@ -147,5 +151,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </section>
 
 <script src="js/details.js"></script>
+<script src="js/dagplanning.js"></script>
+
 </body>
 </html>

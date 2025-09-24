@@ -483,3 +483,24 @@ select.filter-elements:hover {
 .werkdag.inactive { background: #e9ecef; color: #6c757d; border: 1px solid #d6d8db; }
 
 @keyframes fadeIn { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+
+
+/* Zoekbalk */
+.search-input {
+    position: relative;
+}
+
+.search-input input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 220px;
+    transition: border-color 0.2s;
+}
+
+.search-input input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0,123,255,0.3);
+}
