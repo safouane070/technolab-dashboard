@@ -6,7 +6,8 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// Status bijwerken voor een specifieke dag
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
     $dag = $_POST['dag'];
     $toegestaneVelden = ['status_ma','status_di','status_wo','status_do','status_vr'];
@@ -21,14 +22,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], 
     exit;
 }
 
-// Werknemers ophalen
+
+
 $stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Huidige week berekenen (maandag t/m vrijdag)
 $startOfWeek = new DateTime();
 $startOfWeek->modify(('Monday' == $startOfWeek->format('l')) ? 'this monday' : 'last monday');
 
+
+$weekDays = [
+    'Ma' => 'status_ma',
+    'Di' => 'status_di',
+    'Wo' => 'status_wo',
+    'Do' => 'status_do',
+    'Vr' => 'status_vr',
+];
+
+
+
+$startOfWeek = new DateTime();
+$startOfWeek->modify(( 'Monday' == $startOfWeek->format('l')) ? 'this monday' : 'last monday');
 $weekDays = [
     'Ma' => ['col' => 'status_ma', 'date' => clone $startOfWeek],
     'Di' => ['col' => 'status_di', 'date' => (clone $startOfWeek)->modify('+1 day')],
@@ -36,6 +52,17 @@ $weekDays = [
     'Do' => ['col' => 'status_do', 'date' => (clone $startOfWeek)->modify('+3 day')],
     'Vr' => ['col' => 'status_vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
 ];
+
+
+
+$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+$dagen = ['ma', 'di', 'wo', 'do', 'vr'];
+$dagenVolledig = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -90,6 +117,7 @@ $weekDays = [
       <div class="filters">
         <div class="filter-left">
           <div class="date-picker">
+
             <span class="material-symbols-outlined">calendar_today</span>
             <input type="text" placeholder="Select Dates" />
           </div>
@@ -100,7 +128,11 @@ $weekDays = [
         </div>
         <div class="filter-right">
           <button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button>
-          <span class="date-label"><?= $startOfWeek->format('F d') ?> - <?= (clone $startOfWeek)->modify('+4 day')->format('F d, Y') ?></span>
+
+          <span class="date-label"><?= $startOfWeek->format('F d') ?> - <?= (clone $startOfWeek)->modify('+4 day')->format('F d') ?></span>
+
+
+
           <button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button>
         </div>
       </div>
@@ -122,7 +154,7 @@ $weekDays = [
           <tbody>
             <?php foreach ($werknemers as $w): ?>
               <tr>
-                <td><?= htmlspecialchars($w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam']) ?></td>
+                <td><?= ($w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam']) ?></td>
                 <?php foreach ($weekDays as $dayName => $info): ?>
                   <?php
                     $col = $info['col'];
