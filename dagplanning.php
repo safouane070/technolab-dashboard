@@ -74,6 +74,16 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <main class="main">
         <div class="page-header"></div>
 
+        <!-- ✅ Toegevoegde Legenda -->
+        <div class="legend" style="display: flex; gap: 15px; margin: 15px 0;">
+          <div><span class="dot status-aanwezig"></span> Aanwezig</div>
+          <div><span class="dot status-afwezig"></span> Afwezig</div>
+          <div><span class="dot status-ziek"></span> Ziek</div>
+          <div><span class="dot status-opdeschool"></span> Op de school</div>
+          <div><span class="dot status-eefetjes"></span> Tijdelijk Afwezig</div>
+        </div>
+        <!-- ✅ Einde legenda -->
+
         <div class="toolbar">
             <div class="toolbar-left">
                 <!-- 🔎 Zoekveld op naam -->

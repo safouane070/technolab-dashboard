@@ -1,4 +1,4 @@
-body {
+body { 
   font-family: "Inter", sans-serif;
   background: #f9fafb;
   color: #1f2937;
@@ -111,13 +111,15 @@ body {
   font-weight: 700;
 }
 
-.status-legend {
+/* === Legend bolletjes === */
+.legend {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
 
-.status {
+.legend div {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -127,15 +129,18 @@ body {
 
 .dot {
   display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 9999px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
 }
 
-.dot.present { background: #4ade80; }
-.dot.absent { background: #f87171; }
-.dot.planned { background: #facc15; }
+.dot.status-aanwezig { background: #4ade80; }   /* groen */
+.dot.status-afwezig { background: #f87171; }   /* rood */
+.dot.status-ziek { background: #facc15; }      /* geel */
+.dot.status-opdeschool { background: #60a5fa; }/* blauw */
+.dot.status-eefetjes { background: #fb923c; }  /* oranje */
 
+/* Buttons */
 .btn-primary {
   background: #2563eb;
   color: #fff;
@@ -237,10 +242,6 @@ body {
 }
 
 /* Table */
-/* ======================
-   TABLE STYLING
-   ====================== */
-
 .table-container {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -287,7 +288,7 @@ tr:hover {
   cursor: default;
 }
 
-/* Status badges */
+/* === Status badges voor tabel === */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -303,7 +304,7 @@ tr:hover {
 .badge.absent { background: #fee2e2; color: #991b1b; }
 .badge.planned { background: #fef9c3; color: #854d0e; }
 
-/* Row status colors */
+/* Row status background */
 .status-aanwezig { background-color: #f0fdf4; }
 .status-afwezig { background-color: #fef2f2; }
 .status-ziek { background-color: #fef9c3; }
@@ -358,9 +359,7 @@ select.filter-elements:hover {
   border-color: #2563eb;
 }
 
-/* ======================
-   TABLE ACTION ICONS
-   ====================== */
+/* Table action icons */
 .action-icons {
   display: flex;
   gap: 0.5rem;
@@ -404,9 +403,6 @@ select.filter-elements:hover {
   background-color: #fecaca;
   color: #991b1b;
 }
-
-
-
 
 /* Modal styling */
 #detail-modal {
@@ -459,11 +455,12 @@ select.filter-elements:hover {
     width: 100px;
 }
 
-.status-aanwezig { background: #c8f7c5; color: #256029; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-.status-afwezig  { background: #f8c8c8; color: #7d2020; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-.status-ziek     { background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-.status-opdeschool { background: #d6eaff; color: #004085; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-.status-eefetjes { background: #ffe0b3; color: #804000; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+/* Status badges binnen modal */
+.status-aanwezig { background: #c8f7c5; color: #256029; padding: 4px 5px; border-radius: 6px; font-weight: bold; }
+.status-afwezig  { background: #f8c8c8; color: #7d2020; padding: 4px 5px; border-radius: 6px; font-weight: bold; }
+.status-ziek     { background: #fff3cd; color: #856404; padding: 4px 5px; border-radius: 6px; font-weight: bold; }
+.status-opdeschool { background: #d6eaff; color: #004085; padding: 4px 5px; border-radius: 6px; font-weight: bold; }
+.status-eefetjes { background: #ffe0b3; color: #804000; padding: 4px 5px; border-radius: 6px; font-weight: bold; }
 
 .werkdagen {
     display: flex;
@@ -482,8 +479,10 @@ select.filter-elements:hover {
 .werkdag.active { background: #c8f7c5; color: #256029; border: 1px solid #a3e6a0; }
 .werkdag.inactive { background: #e9ecef; color: #6c757d; border: 1px solid #d6d8db; }
 
-@keyframes fadeIn { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
-
+@keyframes fadeIn { 
+  from {opacity:0; transform: translateY(20px);} 
+  to {opacity:1; transform: translateY(0);} 
+}
 
 /* Zoekbalk */
 .search-input {
