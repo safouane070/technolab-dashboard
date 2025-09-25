@@ -33,7 +33,7 @@ if (isset($_GET['delete'])) {
     $stmt->execute([':id' => $id]);
 }
 
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status 
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status , BHV
                     FROM werknemers 
                     ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -118,7 +118,9 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     };
                 ?>
                     <tr class="<?= $statusClass ?>">
-                        <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?></td>
+                        <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>   <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
+                        <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
+                            </span></td>
                         <td><?= $w['status']=='Aanwezig'?'Technolab':'Unknown' ?></td>
                         <td>
                             <form method="post" action="">

@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], 
 }
 
 // Werknemers ophalen
-$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
+$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC, BHV");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Weekdagen
@@ -57,6 +57,7 @@ $weekDays = [
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/week.css" />
+    <link rel="stylesheet" href="css/nav.css" />
 </head>
 <body>
 <div class="app">
@@ -104,7 +105,7 @@ $weekDays = [
 
                 <!-- Today / Week knoppen -->
                 <div class="range-buttons" style="display: flex; gap: 5px;">
-                    <a href="dagplanning.php"><button class="toggle">Today</button></a>
+                    <a href="dagplanning.php"><button class="toggle">Vandaag</button></a>
                     <button class="active">Week</button>
                 </div>
             </div>
@@ -137,7 +138,10 @@ $weekDays = [
                     $weekStatussen = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
                     ?>
                     <tr>
-                        <td class="werknemer-naam"><?= $w['voornaam'].' '.($w['tussenvoegsel'] ? $w['tussenvoegsel'].' ' : '').$w['achternaam'] ?></td>
+                        <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
+                            <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
+                        <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
+                            </span></td>
                         <?php foreach ($weekDays as $dayName => $info): ?>
                             <?php
                             $col = $info['col'];
