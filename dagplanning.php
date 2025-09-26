@@ -103,6 +103,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th>Naam</th>
                         <th>Locatie</th>
                         <th>Status</th>
+                        <th>Duur Afwezig</th>
                         <th>Acties</th>
                     </tr>
                 </thead>
@@ -156,8 +157,14 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h2>Werknemer Details</h2>
             <button id="close-modal">&times;</button>
         </header>
-        <section id="modal-content"></section>
+
+        <section id="modal-content">
+
+
+        </section>
+
     </article>
+
 </section>
 
 <script src="js/details.js"></script>
