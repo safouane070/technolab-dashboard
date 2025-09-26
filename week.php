@@ -1,4 +1,4 @@
-<?php
+<?php 
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -138,10 +138,12 @@ $weekDays = [
                     $weekStatussen = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
                     ?>
                     <tr>
-                        <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
+                        <td class="werknemer-naam">
+                            <?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                             <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
-                        <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
-                            </span></td>
+                                <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
+                            </span>
+                        </td>
                         <?php foreach ($weekDays as $dayName => $info): ?>
                             <?php
                             $col = $info['col'];
