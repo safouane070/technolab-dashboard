@@ -55,7 +55,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Logo -->
     <section class="logo-container">
         <a href="#" class="logo-link">
-            <img src="image/technolab.png" alt="Technolab Logo" class="logo-icon">
+            <img src="image/technolab.png" alt="Technolab Logo" class="logo-icone">
         </a>
     </section>
 

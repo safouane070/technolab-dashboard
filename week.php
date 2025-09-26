@@ -63,24 +63,24 @@ $weekDays = [
 <div class="app">
 
     <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a class="brand" href="#">
-                <svg class="brand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                </svg>
-                <span class="brand-name">Acme HR</span>
-            </a>
-        </div>
-        <nav class="nav">
-            <a href="#">Dashboard</a>
-            <a href="#">Employees</a>
-            <a class="active" href="#">Absences</a>
-            <a href="#">Reports</a>
-        </nav>
-        <div class="header-right"></div>
-    </header>
+<header class="header">
+
+    <!-- Logo -->
+    <section class="logo-container">
+        <a href="#" class="logo-link">
+            <img src="image/technolab.png" alt="Technolab Logo" class="logo-icone">
+        </a>
+    </section>
+
+    <!-- Navigatie -->
+    <nav class="nav" aria-label="Main Navigation">
+        <a href="dagplanning.php" class="active">Dashboard</a>
+        <a href="#">Employees</a>
+        <a href="absent.php">Absences</a>
+        <a href="#">Reports</a>
+    </nav>
+
+</header>
 
     <!-- Main -->
     <main class="main">

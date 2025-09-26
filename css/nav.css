@@ -48,6 +48,12 @@ body {
   object-fit: contain;
 
 }
+.logo-icone {
+  width: 150px;
+  height: 50px;
+  object-fit: contain;
+
+}
 
 /* Navigation */
 .nav {
