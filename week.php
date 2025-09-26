@@ -74,9 +74,9 @@ $weekDays = [
 
     <!-- Navigatie -->
     <nav class="nav" aria-label="Main Navigation">
-        <a href="dagplanning.php" class="active">Dashboard</a>
-        <a href="#">Employees</a>
-        <a href="absent.php">Absences</a>
+        <a href="dagplanning.php">Dashboard</a>
+        <a href="employees.php">Employees</a>
+        <a href="week.php"  class="active">Week</a>
         <a href="#">Reports</a>
     </nav>
 

@@ -21,19 +21,27 @@ if ($today >= 1 && $today <= 5) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
-    $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
-    $stmt->execute([':status' => $_POST['status'], ':id' => intval($_POST['id'])]);
+    $duur = 0;
+    if($_POST['status'] === 'Eefetjes Afwezig' && isset($_POST['duur_afwezig'])) {
+        $duur = intval($_POST['duur_afwezig']);
+    }
+
+    $stmt = $db->prepare("UPDATE werknemers SET status = :status, duur_afwezig = :duur WHERE id = :id");
+    $stmt->execute([
+        ':status' => $_POST['status'],
+        ':duur' => $duur,
+        ':id' => intval($_POST['id'])
+    ]);
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
-
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
     $stmt->execute([':id' => $id]);
 }
 
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status , BHV
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, duur_afwezig
                     FROM werknemers 
                     ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -62,8 +70,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Navigatie -->
     <nav class="nav" aria-label="Main Navigation">
         <a href="dagplanning.php" class="active">Dashboard</a>
-        <a href="#">Employees</a>
-        <a href="absent.php">Absences</a>
+        <a href="employees.php">Employees</a>
+        <a href="week.php">Week</a>
         <a href="#">Reports</a>
     </nav>
 
@@ -103,7 +111,6 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th>Naam</th>
                         <th>Locatie</th>
                         <th>Status</th>
-                        <th>Duur Afwezig</th>
                         <th>Acties</th>
                     </tr>
                 </thead>
@@ -123,7 +130,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
                             </span></td>
                         <td><?= $w['status']=='Aanwezig'?'Technolab':'Unknown' ?></td>
-                        <td>
+                        <td class="tijdelijk-afwezig">
                             <form method="post" action="">
                                 <select class="filter-elements filter-lists" name="status" onchange="this.form.submit()">
                                     <option value="Aanwezig" <?= $w['status']=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
@@ -133,8 +140,19 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
                                 </select>
                                 <input type="hidden" name="id" value="<?= $w['id'] ?>">
+                                <?php if($w['status']=='Eefetjes Afwezig'): ?>
+                                    <input type="number" name="duur_afwezig" value="<?= $w['duur_afwezig'] ?>" min="1" placeholder="uren">
+
+                                <?php endif; ?>
+                                <input type="hidden" name="id" value="<?= $w['id'] ?>">
                             </form>
+
+
+
+
+
                         </td>
+
                         <td class="action-icons">
                             <button class="btn-action btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></button>
                             <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
