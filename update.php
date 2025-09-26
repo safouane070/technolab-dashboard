@@ -76,52 +76,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Update werknemer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/update.css">
 </head>
-<body class="container py-4">
+<body>
 
-<h2>Update werknemer</h2>
-<form method="post">
-    <div class="mb-3">
-        <label>Voornaam</label>
-        <input type="text" name="voornaam" class="form-control" value="<?= ($werknemer['voornaam']) ?>" required>
-    </div>
-    <div class="mb-3">
-        <label>Tussenvoegsel</label>
-        <input type="text" name="tussenvoegsel" class="form-control" value="<?= ($werknemer['tussenvoegsel']) ?>">
-    </div>
-    <div class="mb-3">
-        <label>Achternaam</label>
-        <input type="text" name="achternaam" class="form-control" value="<?= ($werknemer['achternaam']) ?>" required>
-    </div>
-    <div class="mb-3">
-        <label>Email</label>
-        <input type="email" name="email" class="form-control" value="<?= ($werknemer['email']) ?>" required>
-    </div>
-    <div class="mb-3">
-        <label>Sector</label>
-        <input type="text" name="sector" class="form-control" value="<?= ($werknemer['sector']) ?>" required>
-    </div>
-    <div class="form-check mb-3">
-        <input type="checkbox" name="BHV" class="form-check-input" id="BHV" <?= $werknemer['BHV'] ? 'checked' : '' ?>>
-        <label class="form-check-label" for="BHV">BHV</label>
-    </div>
+<div class="update-wrapper">
+    <div class="update-card shadow-lg p-4 rounded-4 bg-white">
+        <h2 class="mb-4 text-center">Update werknemer</h2>
+        <form method="post" class="update-form">
+            <div class="mb-3">
+                <label class="form-label">Voornaam</label>
+                <input type="text" name="voornaam" class="form-control" value="<?= htmlspecialchars($werknemer['voornaam']) ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tussenvoegsel</label>
+                <input type="text" name="tussenvoegsel" class="form-control" value="<?= htmlspecialchars($werknemer['tussenvoegsel']) ?>">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Achternaam</label>
+                <input type="text" name="achternaam" class="form-control" value="<?= htmlspecialchars($werknemer['achternaam']) ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($werknemer['email']) ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Sector</label>
+                <input type="text" name="sector" class="form-control" value="<?= htmlspecialchars($werknemer['sector']) ?>" required>
+            </div>
 
-    <h4>Werkdagen</h4>
-    <?php
-    $days = ['ma' => 'Maandag', 'di' => 'Dinsdag', 'wo' => 'Woensdag', 'do' => 'Donderdag', 'vr' => 'Vrijdag'];
-    foreach ($days as $key => $label):
-        ?>
-        <div class="form-check">
-            <input type="checkbox" name="werkdag_<?= $key ?>" class="form-check-input" id="werkdag_<?= $key ?>"
-                <?= $werknemer["werkdag_$key"] ? 'checked' : '' ?>>
-            <label class="form-check-label" for="werkdag_<?= $key ?>"><?= $label ?></label>
-        </div>
-    <?php endforeach; ?>
+            <div class="form-check form-switch mb-4">
+                <input type="checkbox" name="BHV" class="form-check-input" id="BHV" <?= $werknemer['BHV'] ? 'checked' : '' ?>>
+                <label class="form-check-label" for="BHV">BHV</label>
+            </div>
 
-    <br>
-    <button type="submit" class="btn btn-success">Opslaan</button>
-    <a href="dagplanning.php" class="btn btn-secondary">Terug</a>
-</form>
+            <h4 class="mb-3">Werkdagen</h4>
+            <?php
+            $days = ['ma' => 'Maandag', 'di' => 'Dinsdag', 'wo' => 'Woensdag', 'do' => 'Donderdag', 'vr' => 'Vrijdag'];
+            foreach ($days as $key => $label):
+                ?>
+                <div class="form-check">
+                    <input type="checkbox" name="werkdag_<?= $key ?>" class="form-check-input" id="werkdag_<?= $key ?>"
+                        <?= $werknemer["werkdag_$key"] ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="werkdag_<?= $key ?>"><?= $label ?></label>
+                </div>
+            <?php endforeach; ?>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="dagplanning.php" class="btn btn-outline-secondary">Terug</a>
+                <button type="submit" class="btn btn-success">Opslaan</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 </body>
 </html>

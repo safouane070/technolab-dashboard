@@ -38,16 +38,18 @@ $dagen = [
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Details van <?= ($volledigeNaam) ?></title>
+    <title>Details van <?= htmlspecialchars($volledigeNaam) ?></title>
     <link rel="stylesheet" href="css/details.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <div class="card">
-        <h2><?= ($volledigeNaam) ?></h2>
+        <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
 
-        <p><strong>Email:</strong> <?= ($werknemer['email']) ?></p>
+        <p><i class="bi bi-envelope"></i> <strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
 
-        <p><strong>Status:</strong>
+        <p>
+            <i class="bi bi-activity"></i> <strong>Status:</strong>
             <span class="status
                 <?= $werknemer['status'] === 'Aanwezig' ? 'status-aanwezig' : '' ?>
                 <?= $werknemer['status'] === 'Afwezig' ? 'status-afwezig' : '' ?>
@@ -55,29 +57,33 @@ $dagen = [
                 <?= $werknemer['status'] === 'Op de school' ? 'status-opdeschool' : '' ?>
                 <?= $werknemer['status'] === 'Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
             ">
-                <?= ($werknemer['status']) ?>
+                <?= htmlspecialchars($werknemer['status']) ?>
             </span>
         </p>
 
-        <p><strong>Sector:</strong> <?= ($werknemer['sector']) ?></p>
+        <p><i class="bi bi-diagram-3"></i> <strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
 
-        <p><strong>BHV:</strong>
+        <p>
+            <i class="bi bi-shield-check"></i> <strong>BHV:</strong>
             <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
                 <?= $werknemer['BHV'] ? 'Ja' : 'Nee' ?>
             </span>
         </p>
 
-        <p><strong>Werkdagen:</strong></p>
+        <p><i class="bi bi-calendar-week"></i> <strong>Werkdagen:</strong></p>
         <div class="werkdagen">
             <?php foreach ($dagen as $afkorting => $naam): ?>
                 <?php $isWerkdag = $werknemer['werkdag_' . $afkorting]; ?>
                 <span class="werkdag <?= $isWerkdag ? 'active' : 'inactive' ?>">
-                    <?= ($naam) ?>
+                    <?= htmlspecialchars($naam) ?>
                 </span>
             <?php endforeach; ?>
         </div>
 
-        <a href="dagplanning.php" class="back-link">← Terug naar lijst</a>
+        <div class="button-group">
+            <a href="dagplanning.php" class="btn btn-back"><i class="bi bi-arrow-left"></i> Terug</a>
+            <a href="update.php?id=<?= $werknemer['id'] ?>" class="btn btn-edit"><i class="bi bi-pencil-square"></i> Bewerken</a>
+        </div>
     </div>
 </body>
 </html>
