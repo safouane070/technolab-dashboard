@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 29 sep 2025 om 09:01
+-- Gegenereerd op: 29 sep 2025 om 09:45
 -- Serverversie: 10.4.32-MariaDB
 -- PHP-versie: 8.1.25
 
@@ -76,7 +76,8 @@ INSERT INTO `week_planning` (`id`, `werknemer_id`, `weeknummer`, `jaar`, `dag`, 
 (31, 28, 40, 2025, 'di', 'Aanwezig'),
 (32, 26, 40, 2025, 'do', 'Afwezig'),
 (33, 22, 40, 2025, 'di', 'Op de school'),
-(34, 26, 39, 2025, 'di', 'Op de school');
+(34, 26, 39, 2025, 'di', 'Op de school'),
+(35, 27, 40, 2025, 'ma', 'Eefetjes Afwezig');
 
 -- --------------------------------------------------------
 
@@ -103,19 +104,19 @@ CREATE TABLE `werknemers` (
   `status_wo` enum('Aanwezig','Afwezig','Ziek','Op de school','Eefetjes Afwezig') DEFAULT 'Afwezig',
   `status_do` enum('Aanwezig','Afwezig','Ziek','Op de school','Eefetjes Afwezig') DEFAULT 'Afwezig',
   `status_vr` enum('Aanwezig','Afwezig','Ziek','Op de school','Eefetjes Afwezig') DEFAULT 'Afwezig',
-  `duur_afwezig` int(11) DEFAULT 0
+  `tijdelijk_tot` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `werknemers`
 --
 
-INSERT INTO `werknemers` (`id`, `voornaam`, `tussenvoegsel`, `achternaam`, `email`, `werkdag_ma`, `werkdag_di`, `werkdag_wo`, `werkdag_do`, `werkdag_vr`, `sector`, `BHV`, `status`, `status_ma`, `status_di`, `status_wo`, `status_do`, `status_vr`, `duur_afwezig`) VALUES
-(22, 'Anwer', 'de', 'Anwer', 'amr@technolableiden.nl', 1, 1, 1, 1, 0, 'ICT', 0, 'Afwezig', 'Aanwezig', 'Afwezig', 'Op de school', 'Afwezig', 'Eefetjes Afwezig', 0),
-(23, 'martijn', 'de', 'martijn', 'amr@technolableiden.nl', 1, 1, 0, 1, 0, 'Onderwijs', 1, 'Eefetjes Afwezig', 'Aanwezig', 'Afwezig', 'Op de school', 'Afwezig', 'Afwezig', 10),
-(26, 'Amr', '', 'amr', 'amro@gmail.com', 1, 1, 1, 0, 1, 'Techniek', 0, 'Ziek', 'Ziek', 'Ziek', 'Aanwezig', 'Afwezig', 'Afwezig', 0),
-(27, 'test', '', 'test', 'amro@gmail.com', 1, 1, 1, 1, 1, 'ICT', 1, 'Ziek', 'Eefetjes Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 0),
-(28, 'Amr', '', 'Anwer', 'amro@gmail.com', 0, 1, 1, 1, 0, 'ICT', 1, 'Eefetjes Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 0);
+INSERT INTO `werknemers` (`id`, `voornaam`, `tussenvoegsel`, `achternaam`, `email`, `werkdag_ma`, `werkdag_di`, `werkdag_wo`, `werkdag_do`, `werkdag_vr`, `sector`, `BHV`, `status`, `status_ma`, `status_di`, `status_wo`, `status_do`, `status_vr`, `tijdelijk_tot`) VALUES
+(22, 'Anwer', 'de', 'Anwer', 'amr@technolableiden.nl', 1, 1, 1, 1, 0, 'ICT', 0, 'Aanwezig', 'Aanwezig', 'Afwezig', 'Op de school', 'Afwezig', 'Eefetjes Afwezig', NULL),
+(23, 'martijn', 'de', 'martijn', 'amr@technolableiden.nl', 1, 1, 0, 1, 0, 'Onderwijs', 1, 'Aanwezig', 'Aanwezig', 'Afwezig', 'Op de school', 'Afwezig', 'Afwezig', NULL),
+(26, 'Amr', '', 'amr', 'amro@gmail.com', 1, 1, 1, 0, 1, 'Techniek', 0, 'Eefetjes Afwezig', 'Ziek', 'Ziek', 'Aanwezig', 'Afwezig', 'Afwezig', '0000-00-00 00:00:00'),
+(27, 'test', '', 'test', 'amro@gmail.com', 1, 1, 1, 1, 1, 'ICT', 1, 'Ziek', 'Eefetjes Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
+(28, 'Amr', '', 'Anwer', 'amro@gmail.com', 0, 1, 1, 1, 0, 'ICT', 1, 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL);
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -142,7 +143,7 @@ ALTER TABLE `werknemers`
 -- AUTO_INCREMENT voor een tabel `week_planning`
 --
 ALTER TABLE `week_planning`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT voor een tabel `werknemers`

@@ -19,19 +19,28 @@ if ($today >= 1 && $today <= 5) {
                           AND status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
     $stmt->execute();
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
-    $duur = 0;
-    if($_POST['status'] === 'Eefetjes Afwezig' && isset($_POST['duur_afwezig'])) {
-        $duur = intval($_POST['duur_afwezig']);
+    $id = intval($_POST['id']);
+    $status = $_POST['status'];
+
+    $tijdelijk_tot = null;
+
+    if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot'])) {
+        // Neem de gekozen tijd en plak er vandaag’s datum bij
+        $tijd = $_POST['tijdelijk_tot']; // bv. 14:30
+        $vandaag = date('Y-m-d');
+        $tijdelijk_tot = $vandaag . ' ' . $tijd . ':00'; // bv. 2025-09-29 14:30:00
     }
 
-    $stmt = $db->prepare("UPDATE werknemers SET status = :status, duur_afwezig = :duur WHERE id = :id");
+    $stmt = $db->prepare("UPDATE werknemers 
+                          SET status = :status, tijdelijk_tot = :tijdelijk_tot 
+                          WHERE id = :id");
     $stmt->execute([
-        ':status' => $_POST['status'],
-        ':duur' => $duur,
-        ':id' => intval($_POST['id'])
+        ':status' => $status,
+        ':tijdelijk_tot' => $tijdelijk_tot,
+        ':id' => $id
     ]);
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
@@ -41,7 +50,7 @@ if (isset($_GET['delete'])) {
     $stmt->execute([':id' => $id]);
 }
 
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, duur_afwezig
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, tijdelijk_tot
                     FROM werknemers 
                     ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -132,6 +141,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?= $w['status']=='Aanwezig'?'Technolab':'Unknown' ?></td>
                         <td class="tijdelijk-afwezig">
                             <form method="post" action="">
+                                <input type="hidden" name="id" value="<?= $w['id'] ?>">
+
                                 <select class="filter-elements filter-lists" name="status" onchange="this.form.submit()">
                                     <option value="Aanwezig" <?= $w['status']=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
                                     <option value="Afwezig" <?= $w['status']=='Afwezig'?'selected':'' ?>>Afwezig</option>
@@ -139,19 +150,16 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <option value="Op de school" <?= $w['status']=='Op de school'?'selected':'' ?>>Op school</option>
                                     <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
                                 </select>
-                                <input type="hidden" name="id" value="<?= $w['id'] ?>">
+
                                 <?php if($w['status']=='Eefetjes Afwezig'): ?>
-                                    <input type="number" name="duur_afwezig" value="<?= $w['duur_afwezig'] ?>" min="1" placeholder="uren">
-
+                                    <label>Tot tijd:</label>
+                                    <input type="time" name="tijdelijk_tot"
+                                           value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>">
+                                    <button type="submit" class="btn btn-sm btn-primary">Opslaan</button>
                                 <?php endif; ?>
-                                <input type="hidden" name="id" value="<?= $w['id'] ?>">
                             </form>
-
-
-
-
-
                         </td>
+
 
                         <td class="action-icons">
                             <button class="btn-action btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></button>

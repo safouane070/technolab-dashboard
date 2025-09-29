@@ -12,11 +12,7 @@ document.querySelectorAll('.btn-details').forEach(btn => {
                 // Modal vullen + bewerk knop toevoegen
                 document.getElementById('modal-content').innerHTML = `
                 ${bodyContent}
-                <div class="modal-actions">
-                    <a href="update.php?id=${id}">
-                        <button class="btn btn-primary">Bewerken</button>
-                    </a>
-                </div>
+               
             `;
                 document.getElementById('detail-modal').style.display = 'flex';
             });
