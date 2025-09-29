@@ -154,8 +154,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php if($w['status']=='Eefetjes Afwezig'): ?>
                                     <label>Tot tijd:</label>
                                     <input type="time" name="tijdelijk_tot"
-                                           value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>">
-                                    <button type="submit" class="btn btn-sm btn-primary">Opslaan</button>
+                                           value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>"
+                                           onchange="this.form.submit()">
                                 <?php endif; ?>
                             </form>
                         </td>
