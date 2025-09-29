@@ -1,4 +1,4 @@
-<?php 
+<?php
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -52,7 +52,10 @@ if (isset($_GET['delete'])) {
 
 $stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, tijdelijk_tot
                     FROM werknemers 
-                    ORDER BY achternaam ASC, voornaam ASC");
+                                            ORDER BY 
+                        FIELD(status, 'Aanwezig', 'Eefetjes Afwezig', 'Op de school', 'Ziek', 'Afwezig'),
+                        achternaam ASC, 
+                        voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -124,7 +127,9 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach($werknemers as $w): 
+                <?php
+                $currentStatus = '';
+                foreach($werknemers as $w):
                     $statusClass = match($w['status']){
                         'Aanwezig' => 'status-aanwezig',
                         'Afwezig' => 'status-afwezig',
@@ -133,7 +138,13 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         'Eefetjes Afwezig' => 'status-eefetjes',
                         default => ''
                     };
-                ?>
+
+                    // Nieuwe regel: titel per statusgroep
+                    if ($w['status'] !== $currentStatus) {
+                        $currentStatus = $w['status'];
+                        echo "<tr class='group-header'><td colspan='4'></td></tr>";
+                    }
+                    ?>
                     <tr class="<?= $statusClass ?>">
                         <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>   <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
                         <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>

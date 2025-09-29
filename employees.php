@@ -14,7 +14,7 @@ if (isset($_GET['delete'])) {
     $stmt->execute([':id' => $id]);
 }
 
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, BHV, duur_afwezig
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, BHV
                     FROM werknemers 
                     ORDER BY achternaam ASC, voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
