@@ -43,8 +43,8 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Navigatie -->
     <nav class="nav" aria-label="Main Navigation">
-        <a href="dagplanning.php" class="active">Dashboard</a>
-        <a href="employees.php" >Employees</a>
+        <a href="dagplanning.php" >Dashboard</a>
+        <a href="employees.php" class="active" >Employees</a>
         <a href="week.php">Week</a>
         <a href="#">Reports</a>
     </nav>
@@ -54,7 +54,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <main class="main">
     <div class="page-header"></div>
 
-    
+
 
     <div class="table-container">
         <table>
