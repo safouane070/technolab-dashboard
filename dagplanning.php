@@ -68,6 +68,116 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <link href="css/dagplanning.css" rel="stylesheet"/>
     <link href="css/nav.css" rel="stylesheet"/>
 <title>Absence Tracker</title>
+
+<style>
+/* (grote CSS uit jouw stylesheet — hier ingekort/gekopieerd voor context,
+   maar je kunt ook alleen de "Kolom Dividers" sectie toevoegen als je liever externe CSS wilt blijven gebruiken) */
+
+/* --- Begin bestaande styles (kort voorbeeld, jouw originele bestand bevat meer) --- */
+body { 
+  font-family: "Inter", sans-serif;
+  background: #f9fafb;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Header, layout, buttons, table, etc. (gebruik je bestaande CSS of laat staan zoals hieronder) */
+/* ... (ik heb je originele css in je project; hieronder staan alleen de belangrijkste regels en de nieuwe divider-regels) */
+
+/* Row status background */
+.dot.status-aanwezig { background: #4ade80; }   /* groen */
+.dot.status-afwezig { background: #f87171; }   /* rood */
+.dot.status-ziek { background: #facc15; }      /* geel */
+.dot.status-opdeschool { background: #60a5fa; }/* blauw */
+.dot.status-eefetjes { background: #fb923c; }  /* oranje */
+
+
+/* Table container basics (houd je huidige instellingen) */
+.table-container {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Table basics */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+thead { background: #f3f4f6; }
+th, td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+/* Subtiele divider tussen statusgroepen */
+.group-header td {
+  border-top: 2px solid #e5e7eb;
+  padding: 0;
+  height: 0.5rem;
+  background: #f9fafb;
+}
+
+/* --- Einde bestaande styles --- */
+
+/* === Kolom Dividers (nieuwe, verbeterde versie) === */
+
+/* Basis: rechter rand (verticale, "horizontale" scheiding tussen kolommen) */
+table th.divider, 
+table td.divider {
+  border-right: 5px solid #e5e7eb; /* dikkere, lichtere rand */
+  position: relative;   /* nodig voor ::after positionering */
+  z-index: 1;           /* zorgt dat de celcontent boven de pseudo-elementen komt */
+  padding-right: 1.25rem; /* ruimte zodat de diagonale strook niet over tekst loopt */
+}
+
+/* Geen rechterrand voor de laatste kolom */
+table th.divider:last-child, 
+table td.divider:last-child {
+  border-right: none;
+}
+
+/* Diagonale overlay: smalle strook aan de rechterkant van elke cel */
+table th.divider::after,
+table td.divider::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 18px; /* breedte van de diagonale divider — pas aan naar smaak */
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0,0,0,0.06) 0px,
+    rgba(0,0,0,0.06) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  opacity: 0.18; /* zichtbaarheid, pas aan (0 = geen, 1 = volledig) */
+  pointer-events: none;
+  z-index: 0; /* achter de tekst (ouders hebben z-index:1) */
+}
+
+/* Zorg dat de laatste kolom geen diagonale strook heeft */
+table th.divider:last-child::after,
+table td.divider:last-child::after {
+  display: none;
+}
+
+/* Kleine responsive fix: als de tabel heel smal is, verklein de strook */
+@media (max-width: 640px) {
+  table th.divider::after,
+  table td.divider::after {
+    width: 12px;
+    opacity: 0.12;
+  }
+}
+</style>
 </head>
 <body>
 <header class="header">
@@ -120,10 +230,10 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table>
                 <thead>
                     <tr>
-                        <th>Naam</th>
-                        <th>Locatie</th>
-                        <th>Status</th>
-                        <th>Acties</th>
+                        <th class="divider">Naam</th>
+                        <th class="divider">Locatie</th>
+                        <th class="divider">Status</th>
+                        <th class="divider">Acties</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -146,11 +256,11 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     }
                     ?>
                     <tr class="<?= $statusClass ?>">
-                        <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>   <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
+                        <td class="divider"><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>   <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
                         <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
                             </span></td>
-                        <td><?= $w['status']=='Aanwezig'?'Technolab':'Unknown' ?></td>
-                        <td class="tijdelijk-afwezig">
+                        <td class="divider"><?= $w['status']=='Aanwezig'?'Technolab':'Unknown' ?></td>
+                        <td class="divider tijdelijk-afwezig">
                             <form method="post" action="">
                                 <input type="hidden" name="id" value="<?= $w['id'] ?>">
 
@@ -172,7 +282,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
 
 
-                        <td class="action-icons">
+                        <td class="divider action-icons">
                             <button class="btn-action btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></button>
                             <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
                         </td>

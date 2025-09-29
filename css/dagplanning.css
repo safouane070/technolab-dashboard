@@ -117,6 +117,9 @@ body {
   align-items: center;
   gap: 1.5rem;
   margin-top: 1rem;
+  border-bottom: 1px solid #e5e7eb; /* subtiele divider */
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .legend div {
@@ -283,9 +286,12 @@ tr {
   transition: background 0.2s;
 }
 
-tr:hover {
+/* Subtiele divider tussen statusgroepen */
+.group-header td {
+  border-top: 2px solid #e5e7eb;
+  padding: 0;
+  height: 0.5rem;
   background: #f9fafb;
-  cursor: default;
 }
 
 /* === Status badges voor tabel === */
@@ -431,6 +437,8 @@ select.filter-elements:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb; /* subtiele lijn */
+    padding-bottom: 0.75rem;
 }
 
 #detail-modal header h2 {
@@ -447,7 +455,12 @@ select.filter-elements:hover {
 }
 
 #detail-modal section {
-    margin-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0; /* subtiele divider */
+    padding: 0.75rem 0;
+}
+
+#detail-modal section:last-child {
+    border-bottom: none;
 }
 
 #detail-modal section strong {
@@ -503,3 +516,34 @@ select.filter-elements:hover {
     border-color: #007bff;
     box-shadow: 0 0 4px rgba(0,123,255,0.3);
 }
+
+/* === Custom dividers === */
+
+/* Subtiele horizontale fade-lijn */
+.divider-horizontal {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+  margin: 1rem 0;
+}
+
+/* Subtiele diagonale lijn */
+.divider-diagonal {
+  width: 100%;
+  height: 1px;
+  background: repeating-linear-gradient(
+    45deg,
+    #e5e7eb,
+    #e5e7eb 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  margin: 1rem 0;
+}
+
+
+
+
+
+
+
