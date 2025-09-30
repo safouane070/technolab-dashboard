@@ -130,7 +130,7 @@ th, td {
 /* Basis: rechter rand (verticale, "horizontale" scheiding tussen kolommen) */
 table th.divider, 
 table td.divider {
-  border-right: 5px solid #e5e7eb; /* dikkere, lichtere rand */
+  border-right: 1px solid #e5e7eb; /* dikkere, lichtere rand */
   position: relative;   /* nodig voor ::after positionering */
   z-index: 1;           /* zorgt dat de celcontent boven de pseudo-elementen komt */
   padding-right: 1.25rem; /* ruimte zodat de diagonale strook niet over tekst loopt */
