@@ -1,4 +1,4 @@
-<?php 
+<?php
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -16,20 +16,36 @@ if ($weekOffset !== 0) {
 $jaar = $startOfWeek->format("o");
 $weeknummer = $startOfWeek->format("W");
 
-// Opslaan van status
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
+    $id = intval($_POST['id']);
+    $dag = $_POST['dag']; // ma, di, wo, do, vr
+    $status = $_POST['status'];
+
+    $weeknummer = date('W');
+    $jaar = date('o');
+
+    // Update week_planning
     $stmt = $db->prepare("
         INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
         VALUES (:id, :week, :jaar, :dag, :status)
         ON DUPLICATE KEY UPDATE status = VALUES(status)
     ");
     $stmt->execute([
-        ':id' => intval($_POST['id']),
+        ':id' => $id,
         ':week' => $weeknummer,
         ':jaar' => $jaar,
-        ':dag' => $_POST['dag'],
-        ':status' => $_POST['status']
+        ':dag' => $dag,
+        ':status' => $status
     ]);
+
+    // Als het vandaag is → sync ook naar werknemers tabel
+    $today = date('N');
+    $daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
+    if ($daysMap[$today] === $dag) {
+        $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
+        $stmt->execute([':status'=>$status, ':id'=>$id]);
+    }
+
     header("Location: " . $_SERVER['PHP_SELF'] . "?week=$weekOffset");
     exit;
 }
@@ -109,16 +125,19 @@ $weekDays = [
                     <button class="active">Week</button>
                 </div>
             </div>
+            <div> <h2>Weekplanning Week <?= $weeknummer ?></h2></div>
             <div class="filter-right">
                 <a href="?week=<?= $weekOffset-1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button></a>
                 <span class="date-label"><?= $startOfWeek->format('d M Y') ?> - <?= (clone $startOfWeek)->modify('+4 days')->format('d M Y') ?></span>
                 <a href="?week=<?= $weekOffset+1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button></a>
             </div>
+
         </div>
 
         <!-- Table -->
         <div class="table-wrapper">
             <table id="werknemerTable">
+
                 <thead>
                 <tr>
                     <th>Werknemer</th>
@@ -145,9 +164,11 @@ $weekDays = [
                             </span>
                         </td>
                         <?php foreach ($weekDays as $dayName => $info): ?>
+
                             <?php
+
                             $col = $info['col'];
-                            $status = $weekStatussen[$col] ?? 'Afwezig';
+                            $status = $weekStatussen[$col] ?? ($w['werkdag_'.$col] ? 'Aanwezig' : 'Afwezig');
                             $class = 'status-'.strtolower(str_replace(' ', '', $status));
                             ?>
                             <td>
@@ -180,3 +201,4 @@ $weekDays = [
 
 </body>
 </html>
+
