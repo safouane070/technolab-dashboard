@@ -90,10 +90,6 @@ $weekDays = [
 
     <!-- Navigatie -->
     <nav class="nav" aria-label="Main Navigation">
-        <a href="dagplanning.php">Dashboard</a>
-        <a href="employees.php">Employees</a>
-        <a href="week.php"  class="active">Week</a>
-        <a href="#">Reports</a>
     </nav>
 
 </header>
@@ -106,7 +102,6 @@ $weekDays = [
                 <div><span class="dot status-aanwezig"></span> Aanwezig</div>
                 <div><span class="dot status-afwezig"></span> Afwezig</div>
                 <div><span class="dot status-ziek"></span> Ziek</div>
-                <div><span class="dot status-opdeschool"></span> Op de school</div>
                 <div><span class="dot status-eefetjesafwezig"></span> Tijdelijk Afwezig</div>
             </div>
         </div>
@@ -182,7 +177,6 @@ $weekDays = [
                                             <label><input type="radio" name="status" value="Aanwezig" <?= $status=='Aanwezig' ? 'checked' : '' ?>> Aanwezig</label><br>
                                             <label><input type="radio" name="status" value="Afwezig" <?= $status=='Afwezig' ? 'checked' : '' ?>> Afwezig</label><br>
                                             <label><input type="radio" name="status" value="Ziek" <?= $status=='Ziek' ? 'checked' : '' ?>> Ziek</label><br>
-                                            <label><input type="radio" name="status" value="Op de school" <?= $status=='Op de school' ? 'checked' : '' ?>> Op de school</label><br>
                                             <label><input type="radio" name="status" value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig' ? 'checked' : '' ?>> Tijdelijk Afwezig</label><br><br>
                                             <button type="submit">Opslaan</button>
                                         </form>

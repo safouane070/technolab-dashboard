@@ -43,10 +43,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Navigatie -->
     <nav class="nav" aria-label="Main Navigation">
-        <a href="dagplanning.php" >Dashboard</a>
-        <a href="employees.php" class="active" >Employees</a>
-        <a href="week.php">Week</a>
-        <a href="#">Reports</a>
+       
     </nav>
 
 </header>

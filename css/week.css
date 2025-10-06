@@ -19,7 +19,6 @@
 .status-aanwezig   { background-color: #4caf50; }   /* groen */
 .status-afwezig    { background-color: #f44336; }   /* rood */
 .status-ziek       { background-color: #ffeb3b; }   /* geel */
-.status-opdeschool { background-color: #2196f3; }   /* blauw */
 .status-eefetjesafwezig { background-color: #ff9800; } /* oranje */
 
 /* Popup achtergrond */
@@ -177,7 +176,6 @@
 .status-aanwezig-label   { border-left: 6px solid #4caf50; }  /* groen */
 .status-afwezig-label    { border-left: 6px solid #f44336; }  /* rood */
 .status-ziek-label       { border-left: 6px solid #ffeb3b; }  /* geel */
-.status-opdeschool-label { border-left: 6px solid #2196f3; }  /* blauw */
 .status-eef-label        { border-left: 6px solid #ff9800; }  /* oranje */
 
 

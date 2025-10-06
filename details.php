@@ -54,7 +54,6 @@ $dagen = [
                 <?= $werknemer['status'] === 'Aanwezig' ? 'status-aanwezig' : '' ?>
                 <?= $werknemer['status'] === 'Afwezig' ? 'status-afwezig' : '' ?>
                 <?= $werknemer['status'] === 'Ziek' ? 'status-ziek' : '' ?>
-                <?= $werknemer['status'] === 'Op de school' ? 'status-opdeschool' : '' ?>
                 <?= $werknemer['status'] === 'Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
             ">
                 <?= htmlspecialchars($werknemer['status']) ?>

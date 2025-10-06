@@ -33,10 +33,7 @@
 
       <!-- Navigatie -->
       <nav class="nav" aria-label="Main Navigation">
-        <a href="dagplanning.php" class="active">Dashboard</a>
-        <a href="#">Employees</a>
-        <a href="#">Absences</a>
-        <a href="#">Reports</a>
+
       </nav>
 
       <!-- User actions -->
