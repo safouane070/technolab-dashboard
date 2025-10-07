@@ -8,6 +8,8 @@ try {
 
 // Week offset (0 = deze week, +1 volgende week, -1 vorige week)
 $weekOffset = isset($_GET['week']) ? intval($_GET['week']) : 0;
+
+// Start van de week berekenen
 $startOfWeek = new DateTime();
 $startOfWeek->modify("monday this week");
 if ($weekOffset !== 0) {
@@ -16,15 +18,22 @@ if ($weekOffset !== 0) {
 $jaar = $startOfWeek->format("o");
 $weeknummer = $startOfWeek->format("W");
 
+// 🧠 Weekdagen definities
+$weekDays = [
+    'Ma' => ['col' => 'ma', 'date' => (clone $startOfWeek)],
+    'Di' => ['col' => 'di', 'date' => (clone $startOfWeek)->modify('+1 day')],
+    'Wo' => ['col' => 'wo', 'date' => (clone $startOfWeek)->modify('+2 day')],
+    'Do' => ['col' => 'do', 'date' => (clone $startOfWeek)->modify('+3 day')],
+    'Vr' => ['col' => 'vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
+];
+
+// ✅ Opslaan van status (zonder week te verliezen!)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
     $id = intval($_POST['id']);
     $dag = $_POST['dag']; // ma, di, wo, do, vr
     $status = $_POST['status'];
 
-    $weeknummer = date('W');
-    $jaar = date('o');
-
-    // Update week_planning
+    // Sla status op in juiste week + jaar
     $stmt = $db->prepare("
         INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
         VALUES (:id, :week, :jaar, :dag, :status)
@@ -38,14 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], 
         ':status' => $status
     ]);
 
-    // Als het vandaag is → sync ook naar werknemers tabel
+    // Als de dag van vandaag wordt aangepast → sync naar werknemers-tabel
     $today = date('N');
     $daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
-    if ($daysMap[$today] === $dag) {
+    if (isset($daysMap[$today]) && $daysMap[$today] === $dag && $weeknummer == date('W') && $jaar == date('o')) {
         $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
         $stmt->execute([':status'=>$status, ':id'=>$id]);
     }
 
+    // Blijf op dezelfde week na opslaan
     header("Location: " . $_SERVER['PHP_SELF'] . "?week=$weekOffset");
     exit;
 }
@@ -53,15 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], 
 // Werknemers ophalen
 $stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC, BHV");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Weekdagen
-$weekDays = [
-    'Ma' => ['col' => 'ma', 'date' => clone $startOfWeek],
-    'Di' => ['col' => 'di', 'date' => (clone $startOfWeek)->modify('+1 day')],
-    'Wo' => ['col' => 'wo', 'date' => (clone $startOfWeek)->modify('+2 day')],
-    'Do' => ['col' => 'do', 'date' => (clone $startOfWeek)->modify('+3 day')],
-    'Vr' => ['col' => 'vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
-];
 ?>
 <!DOCTYPE html>
 <html lang="nl">

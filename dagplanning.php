@@ -6,34 +6,24 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// ✅ Dag offset (0 = vandaag, +1 morgen, -1 gisteren)
+// Dag offset (0 = vandaag, +1 morgen, -1 gisteren)
 $dayOffset = isset($_GET['day']) ? intval($_GET['day']) : 0;
 $selectedDate = new DateTime();
 if ($dayOffset !== 0) {
     $selectedDate->modify(($dayOffset > 0 ? '+' : '') . $dayOffset . ' day');
 }
 
-// ✅ Bepaal weekdagnummer (1 = maandag, ..., 7 = zondag)
+// Bepaal weekdagnummer (1 = maandag, ..., 7 = zondag)
 $dayNumber = $selectedDate->format('N');
 
-// ✅ Map naar de juiste kolom
+// Map naar de juiste kolom
 $daysMap = [1 => 'werkdag_ma', 2 => 'werkdag_di', 3 => 'werkdag_wo', 4 => 'werkdag_do', 5 => 'werkdag_vr'];
 
-// ✅ Init status voor deze dag
+// Init status voor deze dag
 if ($dayNumber >= 1 && $dayNumber <= 5) {
     $column = $daysMap[$dayNumber];
 
-    // Reset naar afwezig, behalve speciale statussen
-    $db->exec("UPDATE werknemers 
-               SET status = 'Afwezig' 
-               WHERE status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
 
-    // Aanwezig voor wie die dag moet werken
-    $stmt = $db->prepare("UPDATE werknemers 
-                          SET status = 'Aanwezig' 
-                          WHERE $column = 1 
-                          AND status NOT IN ('Ziek','Eefetjes Afwezig','Op de school')");
-    $stmt->execute();
 }
 
 
@@ -66,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     ]);
     $tijdelijk_tot = null;
     if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot'])) {
-        $tijd = $_POST['tijdelijk_tot']; // bv. 14:30
+        $tijd = $_POST['tijdelijk_tot'];
         $datum = $selectedDate->format('Y-m-d');
         $tijdelijk_tot = $datum . ' ' . $tijd . ':00';
     }
@@ -83,18 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     header("Location: ".$_SERVER['PHP_SELF']);
     exit;
 }
-// ✅ Verwijderen
+// Verwijderen
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
     $stmt->execute([':id' => $id]);
 }
 
-// ✅ Werknemers ophalen met sortering
+// Werknemers ophalen met sortering
 $stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, tijdelijk_tot
                     FROM werknemers 
                     ORDER BY 
-                        FIELD(status, 'Aanwezig', 'Eefetjes Afwezig', 'Op de school', 'Ziek', 'Afwezig'),
+                        FIELD(status, 'Aanwezig', 'Eefetjes Afwezig', 'Ziek', 'Afwezig'),
                         achternaam ASC, 
                         voornaam ASC");
 $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
