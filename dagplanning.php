@@ -284,8 +284,9 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                         </form>
                     </td>
                     <td class="divider action-icons">
-                        <button class="btn-action btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></button>
-                        <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
+                        <a href="details.php?id=<?= $w['id'] ?>" class="btn-action btn-details">
+                            <i class="bi bi-pc-display-horizontal"></i>
+                        </a>                        <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
                     </td>
                 </tr>
             <?php endforeach; ?>
