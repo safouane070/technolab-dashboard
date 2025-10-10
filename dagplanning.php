@@ -22,10 +22,7 @@ $daysMap = [1 => 'werkdag_ma', 2 => 'werkdag_di', 3 => 'werkdag_wo', 4 => 'werkd
 // Init status voor deze dag
 if ($dayNumber >= 1 && $dayNumber <= 5) {
     $column = $daysMap[$dayNumber];
-
-
 }
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
     $id = intval($_POST['id']);
@@ -54,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
         ':dag'=>$dag,
         ':status'=>$status
     ]);
+
     $tijdelijk_tot = null;
     if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot'])) {
         $tijd = $_POST['tijdelijk_tot'];
@@ -73,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     header("Location: ".$_SERVER['PHP_SELF']);
     exit;
 }
+
 // Verwijderen
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
@@ -132,7 +131,7 @@ table {
 }
 thead { background: #f3f4f6; }
 th, td {
-  padding: 0.9rem 1.5rem; /* gelijkmatige padding */
+  padding: 0.9rem 1.5rem;
   text-align: left;
   font-size: 0.875rem;
 }
@@ -194,12 +193,38 @@ td .logo-icon {
     margin-left: 4px;
 }
 
-/* Group-header blijft ongewijzigd */
-.group-header td { border-top: none; border-bottom: 0; }
-
-/* Kleine paddingfix voor alle cellen */
+/* Kleine paddingfix */
 table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
 
+/* Modal CSS */
+#detail-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+#modal-content {
+  background-color: #fff;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 700px;
+  position: relative;
+}
+#close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -284,9 +309,10 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                         </form>
                     </td>
                     <td class="divider action-icons">
-                        <a href="details.php?id=<?= $w['id'] ?>" class="btn-action btn-details">
+                        <a href="#" class="btn-action btn-details" data-id="<?= $w['id'] ?>">
                             <i class="bi bi-pc-display-horizontal"></i>
-                        </a>                        <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
+                        </a>
+                        <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -300,5 +326,42 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
 
 <script src="js/details.js"></script>
 <script src="js/dagplanning.js"></script>
+
+<!-- ✅ Modal container -->
+<div id="detail-modal">
+    <div id="modal-content"></div>
+    <button id="close-modal">&times;</button>
+</div>
+
+<script>
+// Verbeterde details.js code voor popup
+document.querySelectorAll('.btn-details').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        fetch('details.php?id=' + id)
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const card = doc.querySelector('.card');
+                document.getElementById('modal-content').innerHTML = card ? card.outerHTML : '<p>Geen details gevonden.</p>';
+                document.getElementById('detail-modal').style.display = 'flex';
+            })
+            .catch(() => {
+                document.getElementById('modal-content').innerHTML = '<p class="text-danger">Fout bij laden van details.</p>';
+                document.getElementById('detail-modal').style.display = 'flex';
+            });
+    });
+});
+
+document.getElementById('close-modal').addEventListener('click', () => {
+    document.getElementById('detail-modal').style.display = 'none';
+});
+window.addEventListener('click', e => {
+    if (e.target.id === 'detail-modal') {
+        document.getElementById('detail-modal').style.display = 'none';
+    }
+});
+</script>
 </body>
 </html>

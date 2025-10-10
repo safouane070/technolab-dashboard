@@ -1,0 +1,25 @@
+/* css/details-popup.css */
+.detail-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  animation: fadeIn 0.4s ease-in-out;
+}
+.detail-card h2 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: #1a2a42;
+}
+.detail-card p {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

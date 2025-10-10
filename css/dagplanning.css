@@ -1,3 +1,4 @@
+/* === Basislayout === */
 body { 
   font-family: "Inter", sans-serif;
   background: #f9fafb;
@@ -409,62 +410,176 @@ select.filter-elements:hover {
   color: #991b1b;
 }
 
-/* Modal styling */
+/* =========================================================
+   🧩 MODAL / POPUP - GEFIXTE VERSIE (CENTREREN + OVERLAY)
+   ========================================================= */
 #detail-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
+  display: none; /* Verborgen tot geopend */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
 }
 
-#detail-modal article {
-    background: #fff;
-    border-radius: 12px;
-    padding: 30px 40px;
-    width: 500px;
-    max-width: 90%;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    position: relative;
-    animation: fadeIn 0.4s ease-in-out;
+/* Kaart zelf (de popup-box) */
+#detail-modal .card {
+  background: #fff;
+  padding: 40px 45px;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-#detail-modal header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e5e7eb; /* subtiele lijn */
-    padding-bottom: 0.75rem;
+/* 👤 Icoon boven de kaart */
+#detail-modal .card::before {
+  content: "👤";
+  font-size: 40px;
+  width: 90px;
+  height: 90px;
+  line-height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #198754, #43a047);
+  color: #fff;
+  font-weight: bold;
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-#detail-modal header h2 {
-    margin: 0;
-    font-size: 1.6rem;
+/* Titel */
+#detail-modal .card h2 {
+  margin-top: 60px;
+  font-size: 26px;
+  color: #1a2a42;
+  margin-bottom: 25px;
+  font-weight: 700;
 }
 
-#detail-modal header button {
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #555;
+/* Paragrafen (details) */
+#detail-modal .card p {
+  margin: 12px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-#detail-modal section {
-    border-bottom: 1px solid #f0f0f0; /* subtiele divider */
-    padding: 0.75rem 0;
+/* Labels */
+#detail-modal .card strong {
+  color: #2c3e50;
+  font-weight: 600;
 }
 
-#detail-modal section:last-child {
-    border-bottom: none;
+/* Status */
+#detail-modal .status {
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 14px;
+}
+#detail-modal .status-aanwezig   { background: #e6f9ee; color: #187a39; }
+#detail-modal .status-afwezig    { background: #ffeaea; color: #b22a2a; }
+#detail-modal .status-ziek       { background: #fff5cc; color: #7a6200; }
+#detail-modal .status-eefetjes   { background: #ffe9d1; color: #8a4b00; }
+
+/* BHV */
+#detail-modal .bhv {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+#detail-modal .bhv-ja  { background: #e6f9ee; color: #187a39; }
+#detail-modal .bhv-nee { background: #ffeaea; color: #b22a2a; }
+
+/* Werkdagen */
+#detail-modal .werkdagen {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+}
+#detail-modal .werkdag {
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+#detail-modal .werkdag.active {
+  background: #e6f9ee;
+  color: #187a39;
+  border: 1px solid #c9f0d4;
+}
+#detail-modal .werkdag.inactive {
+  background: #f1f3f5;
+  color: #6c757d;
+  border: 1px solid #d6d8db;
+}
+#detail-modal .werkdag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
-#detail-modal section strong {
-    display: inline-block;
-    width: 100px;
+/* Knoppen in popup */
+#detail-modal .button-group {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+#detail-modal .btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+#detail-modal .btn-back {
+  background: #f1f3f5;
+  color: #6c757d;
+  border: 1px solid #d6d8db;
+}
+#detail-modal .btn-back:hover {
+  background: #e2e6ea;
+  color: #495057;
+  transform: translateY(-2px);
+}
+#detail-modal .btn-edit {
+  background: linear-gradient(135deg, #198754, #43a047);
+  color: #fff;
+  border: none;
+}
+#detail-modal .btn-edit:hover {
+  background: linear-gradient(135deg, #146c43, #2e7d32);
+  transform: translateY(-2px);
+}
+
+/* Fade animatie */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Status badges binnen modal */
@@ -474,17 +589,17 @@ select.filter-elements:hover {
 .status-eefetjes { background: #ffe0b3; color: #804000; padding: 4px 5px; border-radius: 6px; font-weight: bold; }
 
 .werkdagen {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .werkdag {
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .werkdag.active { background: #c8f7c5; color: #256029; border: 1px solid #a3e6a0; }
@@ -497,27 +612,25 @@ select.filter-elements:hover {
 
 /* Zoekbalk */
 .search-input {
-    position: relative;
+  position: relative;
 }
 
 .search-input input {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    width: 220px;
-    transition: border-color 0.2s;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 220px;
+  transition: border-color 0.2s;
 }
 
 .search-input input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 4px rgba(0,123,255,0.3);
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0,123,255,0.3);
 }
 
 /* === Custom dividers === */
-
-/* Strakke horizontale fade-lijn (zwart in het midden) */
 .divider-horizontal {
   width: 100%;
   height: 1px;
@@ -525,7 +638,6 @@ select.filter-elements:hover {
   margin: 1rem 0;
 }
 
-/* Diagonale lijn (zwart streepjespatroon) */
 .divider-diagonal {
   width: 100%;
   height: 1px;
@@ -538,9 +650,3 @@ select.filter-elements:hover {
   );
   margin: 1rem 0;
 }
-
-
-
-
-
-
