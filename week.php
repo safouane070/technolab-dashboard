@@ -18,7 +18,7 @@ if ($weekOffset !== 0) {
 $jaar = $startOfWeek->format("o");
 $weeknummer = $startOfWeek->format("W");
 
-// 🧠 Weekdagen definities
+//  Weekdagen definities
 $weekDays = [
     'Ma' => ['col' => 'ma', 'date' => (clone $startOfWeek)],
     'Di' => ['col' => 'di', 'date' => (clone $startOfWeek)->modify('+1 day')],

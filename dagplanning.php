@@ -6,88 +6,68 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// Dag offset (0 = vandaag, +1 morgen, -1 gisteren)
-$dayOffset = isset($_GET['day']) ? intval($_GET['day']) : 0;
-$selectedDate = new DateTime();
-if ($dayOffset !== 0) {
-    $selectedDate->modify(($dayOffset > 0 ? '+' : '') . $dayOffset . ' day');
+// Dag kiezen via GET (?dag=ma, ?dag=di, ...) of standaard vandaag
+$daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
+$todayCol = $daysMap[$todayNum];
+
+$dag = isset($_GET['dag']) && in_array($_GET['dag'], $daysMap) ? $_GET['dag'] : $todayCol;
+
+// Bepaal datum van de gekozen dag
+$dagDatum = new DateTime();
+$dagOffset = array_search($dag, $daysMap) - $todayNum;
+$dagDatum->modify($dagOffset.' days');
+
+$week = $dagDatum->format('W');
+$jaar = $dagDatum->format('o');
+
+// Werknemers ophalen
+$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Automatisch invullen indien nog geen status in week_planning
+foreach($werknemers as $w) {
+    $id = $w['id'];
+
+    // Check of er al status is
+    $stmtCheck = $db->prepare("SELECT status FROM week_planning WHERE werknemer_id=:id AND weeknummer=:week AND jaar=:jaar AND dag=:dag");
+    $stmtCheck->execute([':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+    $row = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+    if(!$row) {
+        $werkdagKolom = 'werkdag_'.$dag;
+        $status = ($w[$werkdagKolom]==1) ? 'Aanwezig' : 'Afwezig';
+
+        $stmtInsert = $db->prepare("INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status) VALUES (:id,:week,:jaar,:dag,:status)");
+        $stmtInsert->execute([
+            ':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag, ':status'=>$status
+        ]);
+    }
 }
 
-// Bepaal weekdagnummer (1 = maandag, ..., 7 = zondag)
-$dayNumber = $selectedDate->format('N');
-
-// Map naar de juiste kolom
-$daysMap = [1 => 'werkdag_ma', 2 => 'werkdag_di', 3 => 'werkdag_wo', 4 => 'werkdag_do', 5 => 'werkdag_vr'];
-
-// Init status voor deze dag
-if ($dayNumber >= 1 && $dayNumber <= 5) {
-    $column = $daysMap[$dayNumber];
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
-    $id = intval($_POST['id']);
+// POST update van status (handmatig)
+if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['id'], $_POST['status'])){
+    $id = (int)$_POST['id'];
     $status = $_POST['status'];
 
-    $today = date('N');
-    $daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
-    $dag = $daysMap[$today];
+    $stmt = $db->prepare("INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
+        VALUES (:id,:week,:jaar,:dag,:status)
+        ON DUPLICATE KEY UPDATE status=VALUES(status)");
+    $stmt->execute([':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag, ':status'=>$status]);
 
-    // Update werknemers tabel
-    $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
-    $stmt->execute([':status'=>$status, ':id'=>$id]);
-
-    // Update of insert week_planning voor deze dag
-    $weeknummer = date('W');
-    $jaar = date('o');
-    $stmt = $db->prepare("
-        INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
-        VALUES (:id, :week, :jaar, :dag, :status)
-        ON DUPLICATE KEY UPDATE status = VALUES(status)
-    ");
-    $stmt->execute([
-        ':id'=>$id,
-        ':week'=>$weeknummer,
-        ':jaar'=>$jaar,
-        ':dag'=>$dag,
-        ':status'=>$status
-    ]);
-
-    $tijdelijk_tot = null;
-    if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot'])) {
-        $tijd = $_POST['tijdelijk_tot'];
-        $datum = $selectedDate->format('Y-m-d');
-        $tijdelijk_tot = $datum . ' ' . $tijd . ':00';
-    }
-
-    $stmt = $db->prepare("UPDATE werknemers 
-                          SET status = :status, tijdelijk_tot = :tijdelijk_tot 
-                          WHERE id = :id");
-    $stmt->execute([
-        ':status' => $status,
-        ':tijdelijk_tot' => $tijdelijk_tot,
-        ':id' => $id
-    ]);
-
-    header("Location: ".$_SERVER['PHP_SELF']);
+    header("Location: ".$_SERVER['PHP_SELF']."?dag=".$dag);
     exit;
 }
 
-// Verwijderen
-if (isset($_GET['delete'])) {
-    $id = intval($_GET['delete']);
-    $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-}
-
-// Werknemers ophalen met sortering
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, tijdelijk_tot
-                    FROM werknemers 
-                    ORDER BY 
-                        FIELD(status, 'Aanwezig', 'Eefetjes Afwezig', 'Ziek', 'Afwezig'),
-                        achternaam ASC, 
-                        voornaam ASC");
-$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Werknemers + status ophalen voor tabel
+$stmt = $db->prepare("SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, wp.status
+                      FROM werknemers w
+                      LEFT JOIN week_planning wp 
+                      ON w.id=wp.werknemer_id AND wp.weeknummer=:week AND wp.jaar=:jaar AND wp.dag=:dag
+                      ORDER BY FIELD(wp.status,'Aanwezig','Afwezig','Ziek','Eefetjes Afwezig'), w.achternaam, w.voornaam");
+$stmt->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+$werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="nl">
