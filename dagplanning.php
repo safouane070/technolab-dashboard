@@ -8,6 +8,7 @@ try {
 
 // Dag kiezen via GET (?dag=ma, ?dag=di, ...) of standaard vandaag
 $daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
+$todayNum = (int)date('N');
 $todayCol = $daysMap[$todayNum];
 
 $dag = isset($_GET['dag']) && in_array($_GET['dag'], $daysMap) ? $_GET['dag'] : $todayCol;
