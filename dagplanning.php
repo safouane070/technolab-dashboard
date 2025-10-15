@@ -55,18 +55,54 @@ if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['id'], $_POST['status']))
         ON DUPLICATE KEY UPDATE status=VALUES(status)");
     $stmt->execute([':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag, ':status'=>$status]);
 
+//    $tijdelijk_tot = null;
+//    if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot'])) {
+//        $tijd = $_POST['tijdelijk_tot'];
+//        $datum = $selectedDate->format('Y-m-d');
+//        $tijdelijk_tot = $datum . ' ' . $tijd . ':00';
+//    }
+
     header("Location: ".$_SERVER['PHP_SELF']."?dag=".$dag);
     exit;
 }
-
+$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, tijdelijk_tot
+                    FROM werknemers 
+                    ORDER BY 
+                        FIELD(status, 'Aanwezig', 'Eefetjes Afwezig', 'Ziek', 'Afwezig'),
+                        achternaam ASC, 
+                        voornaam ASC");
+$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Werknemers + status ophalen voor tabel
-$stmt = $db->prepare("SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, wp.status
-                      FROM werknemers w
-                      LEFT JOIN week_planning wp 
-                      ON w.id=wp.werknemer_id AND wp.weeknummer=:week AND wp.jaar=:jaar AND wp.dag=:dag
-                      ORDER BY FIELD(wp.status,'Aanwezig','Afwezig','Ziek','Eefetjes Afwezig'), w.achternaam, w.voornaam");
+$stmt = $db->prepare("
+    SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, wp.status
+    FROM werknemers w
+    LEFT JOIN week_planning wp 
+        ON w.id = wp.werknemer_id 
+        AND wp.weeknummer = :week 
+        AND wp.jaar = :jaar 
+        AND wp.dag = :dag
+    ORDER BY FIELD(wp.status,'Aanwezig','Eefetjes Afwezig','Ziek','Afwezig'), 
+             w.achternaam, 
+             w.voornaam
+");
 $stmt->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
 $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete']) && !empty($_POST['selected_ids'])) {
+    $ids = array_map('intval', $_POST['selected_ids']);
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $stmt = $db->prepare("DELETE FROM werknemers WHERE id IN ($placeholders)");
+    $stmt->execute($ids);
+    header("Location: ".$_SERVER['PHP_SELF']);
+    exit;
+}
+
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+}
+
 ?>
 
 
@@ -82,7 +118,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <title>Absence Tracker</title>
 
 <style>
-body { 
+body {
   font-family: "Inter", sans-serif;
   background: #f9fafb;
   color: #1f2937;
@@ -126,14 +162,14 @@ th, td {
 }
 
 /* Kolom Dividers (diagonaal) */
-table th.divider, 
+table th.divider,
 table td.divider {
   border-right: 1px solid #e5e7eb;
   position: relative;
   z-index: 1;
   padding-right: 1.25rem;
 }
-table th.divider:last-child, 
+table th.divider:last-child,
 table td.divider:last-child { border-right: none; }
 table th.divider::after,
 table td.divider::after {
@@ -206,6 +242,8 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
   font-size: 1.5rem;
   cursor: pointer;
 }
+.select-row, #select-all { display: none; }
+
 </style>
 </head>
 <body>
@@ -237,6 +275,14 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                 <button class="toggle active">Vandaag</button>
                 <a href="week.php"><button class="toggle">Week</button></a>
             </div>
+            <div class="toolbar-right" style="display:flex; gap:10px;">
+                <button id="select-mode" class="btn btn-outline-secondary btn-sm">Selecteren</button>
+                <form method="post" id="bulk-delete-form" style="display:none;">
+                    <input type="hidden" name="bulk_delete" value="1">
+                    <button type="submit" class="btn btn-danger btn-sm">Verwijderen</button>
+
+                </form>
+            </div>
         </div>
     </div>
 
@@ -244,6 +290,7 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
         <table>
             <thead>
                 <tr>
+                    <th class="divider"><input type="checkbox" id="select-all"></th>
                     <th class="divider">Naam</th>
                     <th class="divider">Status</th>
                     <th class="divider">Acties</th>
@@ -267,7 +314,11 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                 }
                 ?>
                 <tr class="<?= $statusClass ?>">
-                    <td class="divider"><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?> 
+                    <td class="divider">
+
+                        <input type="checkbox" class="select-row" name="selected_ids[]" value="<?= $w['id'] ?>" data-bhv="<?= $w['BHV'] ?>">
+                    </td>
+                    <td class="divider"><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                     </td>
                     <td class="divider tijdelijk-afwezig">
@@ -279,19 +330,16 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                                 <option value="Ziek" <?= $w['status']=='Ziek'?'selected':'' ?>>Ziek</option>
                                 <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
                             </select>
-                            <?php if($w['status']=='Eefetjes Afwezig'): ?>
-                                <label>Tot tijd:</label>
-                                <input type="time" name="tijdelijk_tot"
-                                       value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>"
-                                       onchange="this.form.submit()">
-                            <?php endif; ?>
                         </form>
                     </td>
                     <td class="divider action-icons">
                         <a href="#" class="btn-action btn-details" data-id="<?= $w['id'] ?>">
                             <i class="bi bi-pc-display-horizontal"></i>
                         </a>
-                        <a href="?delete=<?= $w['id'] ?>" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>
+                    </td>
+                </tr>
+
+<!--                                        <a href="?delete=--><?php //= $w['id'] ?><!--" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>-->
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -341,6 +389,28 @@ window.addEventListener('click', e => {
         document.getElementById('detail-modal').style.display = 'none';
     }
 });
+const selectModeBtn = document.getElementById('select-mode');
+const bulkDeleteForm = document.getElementById('bulk-delete-form');
+const checkboxes = document.querySelectorAll('.select-row');
+const selectAll = document.getElementById('select-all');
+
+let selecting = false;
+
+selectModeBtn.addEventListener('click', () => {
+    selecting = !selecting;
+    document.querySelectorAll('.select-row').forEach(cb => {
+        cb.style.display = selecting ? 'inline-block' : 'none';
+        cb.checked = false;
+    });
+    selectAll.style.display = selecting ? 'inline-block' : 'none';
+    bulkDeleteForm.style.display = selecting ? 'inline-block' : 'none';
+    selectModeBtn.textContent = selecting ? 'Annuleren' : 'Selecteren';
+});
+
+selectAll.addEventListener('change', (e) => {
+    checkboxes.forEach(cb => cb.checked = e.target.checked);
+});
+
 </script>
 </body>
 </html>
