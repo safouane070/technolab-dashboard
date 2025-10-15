@@ -97,11 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete']) && !em
     exit;
 }
 
-if (isset($_GET['delete'])) {
-    $id = intval($_GET['delete']);
-    $stmt = $db->prepare("DELETE FROM werknemers WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-}
 
 ?>
 
@@ -316,7 +311,7 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                 <tr class="<?= $statusClass ?>">
                     <td class="divider">
 
-                        <input type="checkbox" class="select-row" name="selected_ids[]" value="<?= $w['id'] ?>" data-bhv="<?= $w['BHV'] ?>">
+                        <input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form">
                     </td>
                     <td class="divider"><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
@@ -339,7 +334,6 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                     </td>
                 </tr>
 
-<!--                                        <a href="?delete=--><?php //= $w['id'] ?><!--" class="btn-action btn-delete" onclick="return confirm('Weet je zeker?');"><i class="bi bi-trash3"></i></a>-->
                     </td>
                 </tr>
             <?php endforeach; ?>
