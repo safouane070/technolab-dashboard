@@ -245,7 +245,6 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
             <thead>
                 <tr>
                     <th class="divider">Naam</th>
-                    <th class="divider">Locatie</th>
                     <th class="divider">Status</th>
                     <th class="divider">Acties</th>
                 </tr>
@@ -271,7 +270,6 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
                     <td class="divider"><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?> 
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                     </td>
-                    <td class="divider"><?= $w['status']=='Aanwezig'?'Technolab':'Unknown' ?></td>
                     <td class="divider tijdelijk-afwezig">
                         <form method="post" action="">
                             <input type="hidden" name="id" value="<?= $w['id'] ?>">
