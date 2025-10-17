@@ -1,4 +1,5 @@
 <?php
+// 📌 Database connectie
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -6,240 +7,119 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// Dag kiezen via GET (?dag=ma, ?dag=di, ...) of standaard vandaag
-$daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
+// 📅 Dag bepalen
+$daysMap = [1=>'ma', 2=>'di', 3=>'wo', 4=>'do', 5=>'vr'];
 $todayNum = (int)date('N');
 $todayCol = $daysMap[$todayNum];
-
 $dag = isset($_GET['dag']) && in_array($_GET['dag'], $daysMap) ? $_GET['dag'] : $todayCol;
 
-// Bepaal datum van de gekozen dag
 $dagDatum = new DateTime();
 $dagOffset = array_search($dag, $daysMap) - $todayNum;
 $dagDatum->modify($dagOffset.' days');
-
 $week = $dagDatum->format('W');
 $jaar = $dagDatum->format('o');
 
-// Werknemers ophalen
-$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC");
-$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// 🧼 Dubbele rijen voorkomen via unieke sleutel (moet al in DB staan)
+$insertUpdate = $db->prepare("
+    INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status, tijdelijk_tot)
+    VALUES (:id, :week, :jaar, :dag, :status, :tijdelijk_tot)
+    ON DUPLICATE KEY UPDATE status=VALUES(status), tijdelijk_tot=VALUES(tijdelijk_tot)
+");
 
-// Automatisch invullen indien nog geen status in week_planning
-foreach($werknemers as $w) {
-    $id = $w['id'];
+// 🧑 Werknemers inplannen als ze er nog niet in staan
+$stmtWerknemers = $db->query("SELECT * FROM werknemers");
+$werknemers = $stmtWerknemers->fetchAll(PDO::FETCH_ASSOC);
 
-    // Check of er al status is
-    $stmtCheck = $db->prepare("SELECT status FROM week_planning WHERE werknemer_id=:id AND weeknummer=:week AND jaar=:jaar AND dag=:dag");
-    $stmtCheck->execute([':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
-    $row = $stmtCheck->fetch(PDO::FETCH_ASSOC);
-
-    if(!$row) {
+foreach ($werknemers as $w) {
+    $check = $db->prepare("SELECT id FROM week_planning WHERE werknemer_id=:id AND weeknummer=:week AND jaar=:jaar AND dag=:dag");
+    $check->execute([':id'=>$w['id'], ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+    if (!$check->fetch()) {
         $werkdagKolom = 'werkdag_'.$dag;
-        $status = ($w[$werkdagKolom]==1) ? 'Aanwezig' : 'Afwezig';
-
-        $stmtInsert = $db->prepare("INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status) VALUES (:id,:week,:jaar,:dag,:status)");
-        $stmtInsert->execute([
-            ':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag, ':status'=>$status
+        $status = ($w[$werkdagKolom] == 1) ? 'Aanwezig' : 'Afwezig';
+        $insertUpdate->execute([
+            ':id'=>$w['id'],
+            ':week'=>$week,
+            ':jaar'=>$jaar,
+            ':dag'=>$dag,
+            ':status'=>$status,
+            ':tijdelijk_tot'=>null
         ]);
     }
 }
 
-// POST update van status (handmatig)
-if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['id'], $_POST['status'])){
+// ⏰ Tijdelijk afwezig resetten als tijd voorbij is
+$checkTijd = $db->prepare("SELECT id, tijdelijk_tot FROM week_planning WHERE weeknummer=:week AND jaar=:jaar AND dag=:dag AND status='Eefetjes Afwezig'");
+$checkTijd->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+$now = time();
+$reset = $db->prepare("UPDATE week_planning SET status='Aanwezig', tijdelijk_tot=NULL WHERE id=:id");
+while ($row = $checkTijd->fetch(PDO::FETCH_ASSOC)) {
+    if ($row['tijdelijk_tot'] && strtotime($row['tijdelijk_tot']) <= $now) {
+        $reset->execute([':id'=>$row['id']]);
+    }
+}
+
+// 📨 Status updaten
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
     $id = (int)$_POST['id'];
     $status = $_POST['status'];
+    $tijdelijk_tot = null;
 
-    $stmt = $db->prepare("INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
-        VALUES (:id,:week,:jaar,:dag,:status)
-        ON DUPLICATE KEY UPDATE status=VALUES(status)");
-    $stmt->execute([':id'=>$id, ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag, ':status'=>$status]);
+    if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijd'])) {
+        $tijdelijk_tot = $dagDatum->format('Y-m-d') . ' ' . $_POST['tijd'] . ':00';
+    }
 
-//    $tijdelijk_tot = null;
-//    if ($status === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot'])) {
-//        $tijd = $_POST['tijdelijk_tot'];
-//        $datum = $selectedDate->format('Y-m-d');
-//        $tijdelijk_tot = $datum . ' ' . $tijd . ':00';
-//    }
+    $insertUpdate->execute([
+        ':id'=>$id,
+        ':week'=>$week,
+        ':jaar'=>$jaar,
+        ':dag'=>$dag,
+        ':status'=>$status,
+        ':tijdelijk_tot'=>$tijdelijk_tot
+    ]);
+
+    // Ook hoofdstatus bijwerken in werknemers voor overzicht
+    $db->prepare("UPDATE werknemers SET status=:status WHERE id=:id")
+        ->execute([':status'=>$status, ':id'=>$id]);
 
     header("Location: ".$_SERVER['PHP_SELF']."?dag=".$dag);
     exit;
 }
-$stmt = $db->query("SELECT id, voornaam, tussenvoegsel, achternaam, status, BHV, tijdelijk_tot
-                    FROM werknemers 
-                    ORDER BY 
-                        FIELD(status, 'Aanwezig', 'Eefetjes Afwezig', 'Ziek', 'Afwezig'),
-                        achternaam ASC, 
-                        voornaam ASC");
-$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-// Werknemers + status ophalen voor tabel
-$stmt = $db->prepare("
-    SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, wp.status
-    FROM werknemers w
-    LEFT JOIN week_planning wp 
-        ON w.id = wp.werknemer_id 
-        AND wp.weeknummer = :week 
-        AND wp.jaar = :jaar 
-        AND wp.dag = :dag
-    ORDER BY FIELD(wp.status,'Aanwezig','Eefetjes Afwezig','Ziek','Afwezig'), 
-             w.achternaam, 
-             w.voornaam
-");
-$stmt->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
-$werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// 🗑️ Bulk verwijderen
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete']) && !empty($_POST['selected_ids'])) {
     $ids = array_map('intval', $_POST['selected_ids']);
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
     $stmt = $db->prepare("DELETE FROM werknemers WHERE id IN ($placeholders)");
     $stmt->execute($ids);
-    header("Location: ".$_SERVER['PHP_SELF']);
+    header("Location: ".$_SERVER['PHP_SELF']."?dag=".$dag);
     exit;
 }
 
-
+// 👥 Data ophalen voor tabel
+$stmt = $db->prepare("
+    SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, w.BHV, wp.status, wp.tijdelijk_tot
+    FROM werknemers w
+    LEFT JOIN week_planning wp 
+        ON w.id = wp.werknemer_id
+        AND wp.weeknummer = :week
+        AND wp.jaar = :jaar
+        AND wp.dag = :dag
+    ORDER BY FIELD(wp.status,'Aanwezig','Eefetjes Afwezig','Ziek','Afwezig'),
+             w.achternaam, w.voornaam
+");
+$stmt->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+$werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-<link href="css/dagplanning.css" rel="stylesheet"/>
-<link href="css/nav.css" rel="stylesheet"/>
-<title>Absence Tracker</title>
-
-<style>
-body {
-  font-family: "Inter", sans-serif;
-  background: #f9fafb;
-  color: #1f2937;
-  margin: 0;
-}
-
-/* Status dots */
-.dot.status-aanwezig { background: #4ade80; }
-.dot.status-afwezig { background: #f87171; }
-.dot.status-ziek { background: #facc15; }
-.dot.status-eefetjes { background: #fb923c; }
-
-/* Table container */
-.table-container {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  overflow-x: auto;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-/* Table basics */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-thead { background: #f3f4f6; }
-th, td {
-  padding: 0.9rem 1.5rem;
-  text-align: left;
-  font-size: 0.875rem;
-}
-
-/* Subtiele divider tussen statusgroepen */
-.group-header td {
-  border-top: 2px solid #e5e7eb;
-  padding: 0;
-  height: 0.5rem;
-  background: #f9fafb;
-}
-
-/* Kolom Dividers (diagonaal) */
-table th.divider,
-table td.divider {
-  border-right: 1px solid #e5e7eb;
-  position: relative;
-  z-index: 1;
-  padding-right: 1.25rem;
-}
-table th.divider:last-child,
-table td.divider:last-child { border-right: none; }
-table th.divider::after,
-table td.divider::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 18px;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(0,0,0,0.06) 0px,
-    rgba(0,0,0,0.06) 2px,
-    transparent 2px,
-    transparent 6px
-  );
-  opacity: 0.18;
-  pointer-events: none;
-  z-index: 0;
-}
-table th.divider:last-child::after,
-table td.divider:last-child::after { display: none; }
-
-/* Zwarte onderranden tussen personen */
-table tbody tr:not(.group-header) td {
-  border-bottom: 1px solid #000;
-}
-table tbody tr:not(.group-header):last-child td {
-  border-bottom: none;
-}
-
-/* BHV-icoon inline zodat rijen gelijk blijven */
-td .logo-icon {
-    display: inline-block;
-    vertical-align: middle;
-    width: 20px;
-    height: 20px;
-    margin-left: 4px;
-}
-
-/* Kleine paddingfix */
-table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
-
-/* Modal CSS */
-#detail-modal {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.5);
-}
-#modal-content {
-  background-color: #fff;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 700px;
-  position: relative;
-}
-#close-modal {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  border: none;
-  background: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-.select-row, #select-all { display: none; }
-
-</style>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="css/dagplanning.css" rel="stylesheet"/>
+    <link href="css/nav.css" rel="stylesheet"/>
+    <title>Dagplanning</title>
 </head>
 <body>
 <header class="header">
@@ -248,34 +128,39 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
             <img src="image/technolab.png" alt="Technolab Logo" class="logo-icone">
         </a>
     </section>
-    <nav class="nav" aria-label="Main Navigation"></nav>
 </header>
 
 <main class="main">
-    <div class="page-header"></div>
+    <div class="page-header">
+        <h4><?= $dagDatum->format('l d-m-Y') ?> </h4>
+        <div class="day-nav" style="margin:10px 0;">
+            <a href="?dag=ma" class="btn btn-outline-secondary btn-sm">Ma</a>
+            <a href="?dag=di" class="btn btn-outline-secondary btn-sm">Di</a>
+            <a href="?dag=wo" class="btn btn-outline-secondary btn-sm">Wo</a>
+            <a href="?dag=do" class="btn btn-outline-secondary btn-sm">Do</a>
+            <a href="?dag=vr" class="btn btn-outline-secondary btn-sm">Vr</a>
+        </div>
+    </div>
 
-    <div class="legend" style="display: flex; gap: 15px; margin: 15px 0;">
-      <div><span class="dot status-aanwezig"></span> Aanwezig</div>
-      <div><span class="dot status-afwezig"></span> Afwezig</div>
-      <div><span class="dot status-ziek"></span> Ziek</div>
-      <div><span class="dot status-eefetjes"></span> Tijdelijk Afwezig</div>
+    <div class="legend" style="display:flex;gap:15px;margin:15px 0;">
+        <div><span class="dot status-aanwezig"></span> Aanwezig</div>
+        <div><span class="dot status-afwezig"></span> Afwezig</div>
+        <div><span class="dot status-ziek"></span> Ziek</div>
+        <div><span class="dot status-eefetjes"></span> Tijdelijk Afwezig</div>
     </div>
 
     <div class="toolbar">
         <div class="toolbar-left">
-            <div class="search-input">
-                <input type="text" id="search" placeholder="Zoek op naam...">
-            </div>
+            <input type="text" id="search" placeholder="Zoek op naam...">
             <div class="toggle-group">
                 <button class="toggle active">Vandaag</button>
                 <a href="week.php"><button class="toggle">Week</button></a>
             </div>
-            <div class="toolbar-right" style="display:flex; gap:10px;">
+            <div class="toolbar-right" style="display:flex;gap:10px;">
                 <button id="select-mode" class="btn btn-outline-secondary btn-sm">Selecteren</button>
                 <form method="post" id="bulk-delete-form" style="display:none;">
                     <input type="hidden" name="bulk_delete" value="1">
                     <button type="submit" class="btn btn-danger btn-sm">Verwijderen</button>
-
                 </form>
             </div>
         </div>
@@ -284,57 +169,43 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
     <div class="table-container">
         <table>
             <thead>
-                <tr>
-                    <th class="divider"><input type="checkbox" id="select-all"></th>
-                    <th class="divider">Naam</th>
-                    <th class="divider">Status</th>
-                    <th class="divider">Acties</th>
-                </tr>
+            <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>Naam</th>
+                <th>Status</th>
+                <th>Actie</th>
+            </tr>
             </thead>
             <tbody>
-            <?php
-            $currentStatus = '';
-            foreach($werknemers as $w):
-                $statusClass = match($w['status']){
+            <?php foreach ($werknemersStatus as $w): ?>
+                <?php
+                $status = $w['status'] ?? 'Afwezig';
+                $statusClass = match($status) {
                     'Aanwezig' => 'status-aanwezig',
                     'Afwezig' => 'status-afwezig',
                     'Ziek' => 'status-ziek',
                     'Eefetjes Afwezig' => 'status-eefetjes',
                     default => ''
                 };
-
-                if ($w['status'] !== $currentStatus) {
-                    $currentStatus = $w['status'];
-                    echo "<tr class='group-header'><td colspan='4'></td></tr>";
-                }
                 ?>
                 <tr class="<?= $statusClass ?>">
-                    <td class="divider">
-
-                        <input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form">
-                    </td>
-                    <td class="divider"><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
+                    <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
+                    <td><?= htmlspecialchars($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                     </td>
-                    <td class="divider tijdelijk-afwezig">
-                        <form method="post" action="">
+                    <td>
+                        <form method="post">
                             <input type="hidden" name="id" value="<?= $w['id'] ?>">
-                            <select class="filter-elements filter-lists" name="status" onchange="this.form.submit()">
-                                <option value="Aanwezig" <?= $w['status']=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
-                                <option value="Afwezig" <?= $w['status']=='Afwezig'?'selected':'' ?>>Afwezig</option>
-                                <option value="Ziek" <?= $w['status']=='Ziek'?'selected':'' ?>>Ziek</option>
-                                <option value="Eefetjes Afwezig" <?= $w['status']=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
+                            <select name="status" onchange="toggleTijd(this, <?= $w['id'] ?>); this.form.submit();">
+                                <option value="Aanwezig" <?= $status=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
+                                <option value="Afwezig" <?= $status=='Afwezig'?'selected':'' ?>>Afwezig</option>
+                                <option value="Ziek" <?= $status=='Ziek'?'selected':'' ?>>Ziek</option>
+                                <option value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
                             </select>
+                            <input type="time" name="tijd" id="tijdveld-<?= $w['id'] ?>" value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>" style="display:<?= $status=='Eefetjes Afwezig'?'inline-block':'none' ?>;">
                         </form>
                     </td>
-                    <td class="divider action-icons">
-                        <a href="#" class="btn-action btn-details" data-id="<?= $w['id'] ?>">
-                            <i class="bi bi-pc-display-horizontal"></i>
-                        </a>
-                    </td>
-                </tr>
-
-                    </td>
+                    <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
@@ -345,66 +216,62 @@ table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
     <a href="add.php"><button>➕ Voeg een medewerker toe</button></a>
 </main>
 
-<script src="js/details.js"></script>
-<script src="js/dagplanning.js"></script>
-
-<!-- ✅ Modal container -->
+<!-- 📌 Modal -->
 <div id="detail-modal">
     <div id="modal-content"></div>
     <button id="close-modal">&times;</button>
 </div>
 
 <script>
-// Verbeterde details.js code voor popup
-document.querySelectorAll('.btn-details').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        fetch('details.php?id=' + id)
-            .then(response => response.text())
-            .then(data => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data, 'text/html');
-                const card = doc.querySelector('.card');
-                document.getElementById('modal-content').innerHTML = card ? card.outerHTML : '<p>Geen details gevonden.</p>';
-                document.getElementById('detail-modal').style.display = 'flex';
-            })
-            .catch(() => {
-                document.getElementById('modal-content').innerHTML = '<p class="text-danger">Fout bij laden van details.</p>';
-                document.getElementById('detail-modal').style.display = 'flex';
-            });
+    // Verbeterde details.js code voor popup
+    document.querySelectorAll('.btn-details').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            fetch('details.php?id=' + id)
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const card = doc.querySelector('.card');
+                    document.getElementById('modal-content').innerHTML = card ? card.outerHTML : '<p>Geen details gevonden.</p>';
+                    document.getElementById('detail-modal').style.display = 'flex';
+                })
+                .catch(() => {
+                    document.getElementById('modal-content').innerHTML = '<p class="text-danger">Fout bij laden van details.</p>';
+                    document.getElementById('detail-modal').style.display = 'flex';
+                });
+        });
     });
-});
 
-document.getElementById('close-modal').addEventListener('click', () => {
-    document.getElementById('detail-modal').style.display = 'none';
-});
-window.addEventListener('click', e => {
-    if (e.target.id === 'detail-modal') {
+    document.getElementById('close-modal').addEventListener('click', () => {
         document.getElementById('detail-modal').style.display = 'none';
-    }
-});
-const selectModeBtn = document.getElementById('select-mode');
-const bulkDeleteForm = document.getElementById('bulk-delete-form');
-const checkboxes = document.querySelectorAll('.select-row');
-const selectAll = document.getElementById('select-all');
-
-let selecting = false;
-
-selectModeBtn.addEventListener('click', () => {
-    selecting = !selecting;
-    document.querySelectorAll('.select-row').forEach(cb => {
-        cb.style.display = selecting ? 'inline-block' : 'none';
-        cb.checked = false;
     });
-    selectAll.style.display = selecting ? 'inline-block' : 'none';
-    bulkDeleteForm.style.display = selecting ? 'inline-block' : 'none';
-    selectModeBtn.textContent = selecting ? 'Annuleren' : 'Selecteren';
-});
+    window.addEventListener('click', e => {
+        if (e.target.id === 'detail-modal') {
+            document.getElementById('detail-modal').style.display = 'none';
+        }
+    });
+    const selectModeBtn = document.getElementById('select-mode');
+    const bulkDeleteForm = document.getElementById('bulk-delete-form');
+    const checkboxes = document.querySelectorAll('.select-row');
+    const selectAll = document.getElementById('select-all');
 
-selectAll.addEventListener('change', (e) => {
-    checkboxes.forEach(cb => cb.checked = e.target.checked);
-});
+    let selecting = false;
 
+    selectModeBtn.addEventListener('click', () => {
+        selecting = !selecting;
+        document.querySelectorAll('.select-row').forEach(cb => {
+            cb.style.display = selecting ? 'inline-block' : 'none';
+            cb.checked = false;
+        });
+        selectAll.style.display = selecting ? 'inline-block' : 'none';
+        bulkDeleteForm.style.display = selecting ? 'inline-block' : 'none';
+        selectModeBtn.textContent = selecting ? 'Annuleren' : 'Selecteren';
+    });
+
+    selectAll.addEventListener('change', (e) => {
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
 </script>
 </body>
 </html>

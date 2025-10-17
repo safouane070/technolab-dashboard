@@ -61,7 +61,8 @@ $dagen = [
             </span>
         </p>
 
-        <p><i class="bi bi-diagram-3"></i> <strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector']) ?></p>
+        <p><i class="bi bi-diagram-3"></i> <strong>Sector:</strong>
+            <?= htmlspecialchars($werknemer['sector']) ?></p>
 
         <p>
             <i class="bi bi-shield-check"></i> <strong>BHV:</strong>

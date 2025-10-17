@@ -115,7 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="small-muted">Vul de gegevens in en klik op opslaan</div>
         </div>
     </div>
-
+TK
+    Kiem
+    to
     <form method="post">
         <div class="row g-3 form-section">
             <div class="col-md-4">
@@ -137,10 +139,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="col-md-6">
-                <label class="form-label">Sector</label>
+                <label class="form-label">Cirkels</label>
                 <select name="sector" id="sectorSelect" class="form-select" required>
                     <?php foreach ($sectoren as $s): ?>
-                        <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
+                        <option value="TK">TK</option>
+                        <option value="Keim">Kiem</option>
+                        <option value="To">To</option>
                     <?php endforeach; ?>
                     <option value="__andere__">Andere...</option>
                 </select>
