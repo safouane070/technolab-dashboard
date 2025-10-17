@@ -190,19 +190,27 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 ?>
                 <tr class="<?= $statusClass ?>">
                     <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
-                    <td><?= htmlspecialchars($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
+                    <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                     </td>
                     <td>
                         <form method="post">
                             <input type="hidden" name="id" value="<?= $w['id'] ?>">
-                            <select name="status" onchange="toggleTijd(this, <?= $w['id'] ?>); this.form.submit();">
+
+                                <select name="status"
+                                        style="width:150px;"
+                                        onchange="toggleTime(this, <?= $w['id'] ?>); this.form.submit();">
+
                                 <option value="Aanwezig" <?= $status=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
                                 <option value="Afwezig" <?= $status=='Afwezig'?'selected':'' ?>>Afwezig</option>
                                 <option value="Ziek" <?= $status=='Ziek'?'selected':'' ?>>Ziek</option>
                                 <option value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
                             </select>
-                            <input type="time" name="tijd" id="tijdveld-<?= $w['id'] ?>" value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>" style="display:<?= $status=='Eefetjes Afwezig'?'inline-block':'none' ?>;">
+                            <input type="time" name="tijd"
+                                   id="tijd-<?= $w['id'] ?>"
+                                   value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>"
+                                   style="display:<?= $status=='Eefetjes Afwezig' ? 'inline-block' : 'none' ?>"
+                                   onchange="this.form.submit();">
                         </form>
                     </td>
                     <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
@@ -272,6 +280,11 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     selectAll.addEventListener('change', (e) => {
         checkboxes.forEach(cb => cb.checked = e.target.checked);
     });
+
+        function toggleTime(sel, id) {
+        const t = document.getElementById('tijd-' + id);
+        t.style.display = sel.value === 'Eefetjes Afwezig' ? 'inline-block' : 'none';
+    }
 </script>
 
 <script src="js/dagplanning.js"></script>
