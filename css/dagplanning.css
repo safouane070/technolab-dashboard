@@ -174,10 +174,29 @@ body {
   gap: 1rem;
 }
 
-.toolbar-left, .toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+/* ------------------ Toolbar ------------------ */
+.toolbar-left, .toolbar-right { 
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Zoekveld styling */
+.search-input input,
+#search {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 220px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input input:focus,
+#search:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    outline: none;
 }
 
 .date-input {
@@ -738,3 +757,4 @@ table input[type="time"]:focus {
     align-items: center;
     gap: 10px;
 }
+

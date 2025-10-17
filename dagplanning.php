@@ -170,7 +170,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <table>
             <thead>
             <tr>
-                <th><input type="checkbox" id="select-all"></th>
+                <th></th>
                 <th>Naam</th>
                 <th>Status</th>
                 <th>Actie</th>
