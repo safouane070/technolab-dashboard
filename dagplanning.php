@@ -273,5 +273,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         checkboxes.forEach(cb => cb.checked = e.target.checked);
     });
 </script>
+
+<script src="js/dagplanning.js"></script>
 </body>
 </html>

@@ -650,3 +650,91 @@ select.filter-elements:hover {
   );
   margin: 1rem 0;
 }
+
+
+
+
+
+
+
+/* 🌈 Algemene stijl voor dropdowns */
+table select[name="status"] {
+    appearance: none;
+    padding: 8px 28px 8px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #222;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+}
+
+table select[name="status"]:hover {
+    border-color: #aaa;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+table select[name="status"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+    outline: none;
+}
+
+/* 🕓 Tijdveld (mooi bijpassend) */
+table input[type="time"] {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.25s ease;
+}
+
+table input[type="time"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+    outline: none;
+}
+
+/* 🎨 Kleuraccenten per status (iets dieper, maar nog stijlvol) */
+.status-aanwezig select[name="status"] {
+    background-color: #e7f6ec;
+    border-color: #9cd3a3;
+}
+
+.status-afwezig select[name="status"] {
+    background-color: #fbe9eb;
+    border-color: #f1a7a7;
+}
+
+.status-ziek select[name="status"] {
+    background-color: #fff4d9;
+    border-color: #ffd36a;
+}
+
+.status-eefetjes select[name="status"] {
+    background-color: #e6f3fb;
+    border-color: #8bc5e0;
+}
+
+/* ✨ Kleine animatie bij hover */
+.status-aanwezig select[name="status"]:hover,
+.status-afwezig select[name="status"]:hover,
+.status-ziek select[name="status"]:hover,
+.status-eefetjes select[name="status"]:hover {
+    transform: scale(1.03);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* 🎯 Alles netjes uitgelijnd */
+.status-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
