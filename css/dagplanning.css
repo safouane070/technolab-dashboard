@@ -264,54 +264,100 @@ body {
 }
 
 /* Table */
+/* ===============================
+   DAGPLANNING.CSS (verbeterde versie)
+   =============================== */
+
+/* --- Container styling --- */
+/* ===============================
+   DAGPLANNING.CSS — uitlijning gefixt
+   =============================== */
+
 .table-container {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
-  overflow-x: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 500px;
 }
 
+/* --- Header --- */
 thead {
   background: #f3f4f6;
 }
 
-th, td {
-  padding: 1rem 1.5rem;
+thead th {
   text-align: left;
-  font-size: 0.875rem;
-}
-
-th {
+  padding: 1rem 1.5rem;
   font-weight: 600;
   color: #111827;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-right: 1px solid #000000;
+}
+
+/* --- Cellen --- */
+th, td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  vertical-align: middle;
 }
 
 td {
   font-size: 18px;
   color: #1f2937;
-  vertical-align: middle;
 }
 
 tr {
   transition: background 0.2s;
 }
 
-/* Subtiele divider tussen statusgroepen */
-.group-header td {
-  border-top: 2px solid #e5e7eb;
-  padding: 0;
-  height: 0.5rem;
-  background: #f9fafb;
+/* --- Eerste kolom: naam --- */
+thead th:first-child,
+tbody td:first-child {
+  text-align: left;
+  padding-left: 1rem;
+  border-left: 1px solid #000000;
 }
+
+/* --- Laatste kolom: editknop --- */
+thead th:last-child,
+tbody td:last-child {
+  width: 50px; /* genoeg ruimte voor de knop */
+  text-align: center;
+  padding: 0.5rem;
+  border-right: 1px solid #000000;
+}
+
+/* --- Verwijder witruimte / uitlijn fout --- */
+tbody td:nth-child(2),
+tbody td:nth-child(3) {
+  text-align: left;
+}
+
+/* --- Zorg dat iconen verticaal gecentreerd blijven --- */
+tbody td * {
+  vertical-align: middle;
+}
+
+/* --- Responsief --- */
+@media (max-width: 768px) {
+  th, td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+
 
 /* === Status badges voor tabel === */
 .badge {
@@ -757,4 +803,16 @@ table input[type="time"]:focus {
     align-items: center;
     gap: 10px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
 

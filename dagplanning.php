@@ -166,17 +166,18 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-            <tr>
-                <th></th>
-                <th>Naam</th>
-                <th>Status</th>
-                <th>Actie</th>
-            </tr>
-            </thead>
-            <tbody>
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Naam</th>
+        <th>Status</th>
+        <th>Actie</th>
+                        <th></th>
+
+      </tr>
+    </thead>
+    <tbody>
             <?php foreach ($werknemersStatus as $w): ?>
                 <?php
                 $status = $w['status'] ?? 'Afwezig';
@@ -189,7 +190,6 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 };
                 ?>
                 <tr class="<?= $statusClass ?>">
-                    <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
                     <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                     </td>
@@ -214,6 +214,8 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </form>
                     </td>
                     <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
+                                    <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
+
                 </tr>
             <?php endforeach; ?>
             </tbody>
@@ -229,6 +231,8 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div id="modal-content"></div>
     <button id="close-modal">&times;</button>
 </div>
+
+
 
 <script>
     // Verbeterde details.js code voor popup
@@ -266,16 +270,41 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     let selecting = false;
 
+    // Selecteren aan/uit
     selectModeBtn.addEventListener('click', () => {
         selecting = !selecting;
-        document.querySelectorAll('.select-row').forEach(cb => {
+        checkboxes.forEach(cb => {
             cb.style.display = selecting ? 'inline-block' : 'none';
             cb.checked = false;
         });
-        selectAll.style.display = selecting ? 'inline-block' : 'none';
+        if (selectAll) selectAll.style.display = selecting ? 'inline-block' : 'none';
         bulkDeleteForm.style.display = selecting ? 'inline-block' : 'none';
         selectModeBtn.textContent = selecting ? 'Annuleren' : 'Selecteren';
     });
+
+    // Selecteer alles
+    if (selectAll) {
+        selectAll.addEventListener('change', (e) => {
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+        });
+    }
+
+    // Confirm alert bij bulk-delete
+    bulkDeleteForm.addEventListener('submit', (e) => {
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        if (selected.length === 0) {
+            alert("Selecteer eerst minstens één medewerker om te verwijderen.");
+            e.preventDefault(); // stop het submitten
+            return;
+        }
+
+        const confirmDelete = confirm(`Weet je zeker dat je ${selected.length} medewerker(s) wilt verwijderen?`);
+        if (!confirmDelete) {
+            e.preventDefault(); // stop het submitten als gebruiker annuleert
+        }
+    });
+
+
 
     selectAll.addEventListener('change', (e) => {
         checkboxes.forEach(cb => cb.checked = e.target.checked);
@@ -286,6 +315,8 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         t.style.display = sel.value === 'Eefetjes Afwezig' ? 'inline-block' : 'none';
     }
 </script>
+ 
+ 
 
 <script src="js/dagplanning.js"></script>
 </body>
