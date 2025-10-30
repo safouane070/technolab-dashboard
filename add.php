@@ -64,7 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':status' => $status
         ]);
 
-        $melding = '<div class="alert alert-success text-center">✅ Medewerker succesvol toegevoegd!</div>';
+
+        header("Location: dagplanning.php");
+        exit;
     }
 }
 ?>

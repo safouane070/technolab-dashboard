@@ -38,7 +38,7 @@ $dagen = [
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Details van <?= htmlspecialchars($volledigeNaam) ?></title>
+    <title>Details van <?= ($volledigeNaam) ?></title>
     <link rel="stylesheet" href="css/details.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     
