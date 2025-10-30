@@ -154,9 +154,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label">Cirkels</label>
                 <select name="sector" id="sectorSelect" class="form-select" required>
                     <option value="">-- Kies sector --</option>
-                    <?php foreach ($sectoren as $s): ?>
-                        <option value="<?= ($s) ?>"><?= ($s) ?></option>
-                    <?php endforeach; ?>
+                    <option value="TK">TK</option>
+                    <option value="Kiem">Kiem</option>
+                    <option value="ICT">ICT</option>
                     <option value="__andere__">Andere...</option>
                 </select>
                 <input type="text" name="sector_nieuw" id="sectorNieuw" class="form-control mt-2" placeholder="Voer nieuwe sector in" style="display:none;">
