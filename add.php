@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="">-- Kies sector --</option>
                     <option value="TK">TK</option>
                     <option value="Kiem">Kiem</option>
-                    <option value="ICT">ICT</option>
+                    <option value="To">To</option>
                     <option value="__andere__">Andere...</option>
                 </select>
                 <input type="text" name="sector_nieuw" id="sectorNieuw" class="form-control mt-2" placeholder="Voer nieuwe sector in" style="display:none;">
