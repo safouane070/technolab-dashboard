@@ -11,6 +11,8 @@ try {
 $sectorenStmt = $db->query("SELECT DISTINCT sector FROM werknemers WHERE sector IS NOT NULL AND sector <> '' ORDER BY sector ASC");
 $sectoren = $sectorenStmt->fetchAll(PDO::FETCH_COLUMN);
 
+$melding = null;
+
 // Verwerking formulier
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $voornaam = $_POST['voornaam'];
@@ -18,44 +20,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $achternaam = $_POST['achternaam'];
     $email = $_POST['email'];
 
-    // sector kan komen uit dropdown of nieuw veld
-    if (isset($_POST['sector_nieuw']) && trim($_POST['sector_nieuw']) !== '') {
-        $sector = trim($_POST['sector_nieuw']);
+    // Check of email al bestaat
+    $checkStmt = $db->prepare("SELECT COUNT(*) FROM werknemers WHERE email = :email");
+    $checkStmt->execute([':email' => $email]);
+    $bestaat = $checkStmt->fetchColumn();
+
+    if ($bestaat > 0) {
+        $melding = '<div class="alert alert-danger text-center">Dit e-mailadres bestaat al. Gebruik een ander adres.</div>';
     } else {
-        $sector = $_POST['sector'];
+        // sector kan komen uit dropdown of nieuw veld
+        if (isset($_POST['sector_nieuw']) && trim($_POST['sector_nieuw']) !== '') {
+            $sector = trim($_POST['sector_nieuw']);
+        } else {
+            $sector = $_POST['sector'];
+        }
+
+        $bhv = isset($_POST['bhv']) ? 1 : 0;
+
+        $werkdag_ma = isset($_POST['werkdag_ma']) ? 1 : 0;
+        $werkdag_di = isset($_POST['werkdag_di']) ? 1 : 0;
+        $werkdag_wo = isset($_POST['werkdag_wo']) ? 1 : 0;
+        $werkdag_do = isset($_POST['werkdag_do']) ? 1 : 0;
+        $werkdag_vr = isset($_POST['werkdag_vr']) ? 1 : 0;
+
+        $status = ($werkdag_ma || $werkdag_di || $werkdag_wo || $werkdag_do || $werkdag_vr) ? "Aanwezig" : "Afwezig";
+
+        $stmt = $db->prepare("INSERT INTO werknemers 
+            (voornaam, tussenvoegsel, achternaam, email, werkdag_ma, werkdag_di, werkdag_wo, werkdag_do, werkdag_vr, sector, BHV, status) 
+            VALUES (:voornaam, :tussenvoegsel, :achternaam, :email, :werkdag_ma, :werkdag_di, :werkdag_wo, :werkdag_do, :werkdag_vr, :sector, :bhv, :status)");
+
+        $stmt->execute([
+            ':voornaam' => $voornaam,
+            ':tussenvoegsel' => $tussenvoegsel,
+            ':achternaam' => $achternaam,
+            ':email' => $email,
+            ':werkdag_ma' => $werkdag_ma,
+            ':werkdag_di' => $werkdag_di,
+            ':werkdag_wo' => $werkdag_wo,
+            ':werkdag_do' => $werkdag_do,
+            ':werkdag_vr' => $werkdag_vr,
+            ':sector' => $sector,
+            ':bhv' => $bhv,
+            ':status' => $status
+        ]);
+
+        $melding = '<div class="alert alert-success text-center">✅ Medewerker succesvol toegevoegd!</div>';
     }
-
-    $bhv = isset($_POST['bhv']) ? 1 : 0;
-
-    $werkdag_ma = isset($_POST['werkdag_ma']) ? 1 : 0;
-    $werkdag_di = isset($_POST['werkdag_di']) ? 1 : 0;
-    $werkdag_wo = isset($_POST['werkdag_wo']) ? 1 : 0;
-    $werkdag_do = isset($_POST['werkdag_do']) ? 1 : 0;
-    $werkdag_vr = isset($_POST['werkdag_vr']) ? 1 : 0;
-
-    $status = ($werkdag_ma || $werkdag_di || $werkdag_wo || $werkdag_do || $werkdag_vr) ? "Aanwezig" : "Afwezig";
-
-    $stmt = $db->prepare("INSERT INTO werknemers 
-        (voornaam, tussenvoegsel, achternaam, email, werkdag_ma, werkdag_di, werkdag_wo, werkdag_do, werkdag_vr, sector, BHV, status) 
-        VALUES (:voornaam, :tussenvoegsel, :achternaam, :email, :werkdag_ma, :werkdag_di, :werkdag_wo, :werkdag_do, :werkdag_vr, :sector, :bhv, :status)");
-
-    $stmt->execute([
-        ':voornaam' => $voornaam,
-        ':tussenvoegsel' => $tussenvoegsel,
-        ':achternaam' => $achternaam,
-        ':email' => $email,
-        ':werkdag_ma' => $werkdag_ma,
-        ':werkdag_di' => $werkdag_di,
-        ':werkdag_wo' => $werkdag_wo,
-        ':werkdag_do' => $werkdag_do,
-        ':werkdag_vr' => $werkdag_vr,
-        ':sector' => $sector,
-        ':bhv' => $bhv,
-        ':status' => $status
-    ]);
-
-    header("Location: dagplanning.php");
-    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -103,11 +113,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
 <div class="add-card shadow-lg p-4 rounded-4 bg-white">
+    <?php if ($melding) echo $melding; ?>
+
     <div class="d-flex align-items-center mb-3">
         <div class="me-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#0b5ed7" class="bi bi-person-plus" viewBox="0 0 16 16">
-              <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-              <path fill-rule="evenodd" d="M6 9a6 6 0 1 0 0 12A6 6 0 0 0 6 9zm9.5 3a.5.5 0 0 1 .5.5v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2h-2a.5.5 0 0 1 0-1h2v-2a.5.5 0 0 1 .5-.5z"/>
+                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                <path fill-rule="evenodd" d="M6 9a6 6 0 1 0 0 12A6 6 0 0 0 6 9zm9.5 3a.5.5 0 0 1 .5.5v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2h-2a.5.5 0 0 1 0-1h2v-2a.5.5 0 0 1 .5-.5z"/>
             </svg>
         </div>
         <div>
@@ -115,9 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="small-muted">Vul de gegevens in en klik op opslaan</div>
         </div>
     </div>
-TK
-    Kiem
-    to
+
     <form method="post">
         <div class="row g-3 form-section">
             <div class="col-md-4">
@@ -141,10 +151,9 @@ TK
             <div class="col-md-6">
                 <label class="form-label">Cirkels</label>
                 <select name="sector" id="sectorSelect" class="form-select" required>
+                    <option value="">-- Kies sector --</option>
                     <?php foreach ($sectoren as $s): ?>
-                        <option value="TK">TK</option>
-                        <option value="Keim">Kiem</option>
-                        <option value="To">To</option>
+                        <option value="<?= ($s) ?>"><?= ($s) ?></option>
                     <?php endforeach; ?>
                     <option value="__andere__">Andere...</option>
                 </select>
