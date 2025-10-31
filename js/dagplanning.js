@@ -2,18 +2,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("search");
     const rows = document.querySelectorAll("tbody tr");
 
-    if (!searchInput) return;
+    if (!searchInput || rows.length === 0) return;
+
+    // Kleine delay om performance te verbeteren bij snel typen
+    let timeout = null;
 
     searchInput.addEventListener("input", () => {
-        const filter = searchInput.value.toLowerCase();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const filter = searchInput.value.toLowerCase().trim();
 
-        rows.forEach(row => {
-            // tweede kolom bevat de naam (index 1)
-            const naamCell = row.cells[1];
-            if (!naamCell) return;
+            rows.forEach(row => {
+                // ✅ Pak de eerste kolom (naam)
+                const naamCell = row.querySelector("td:first-child");
+                if (!naamCell) return;
 
-            const naam = naamCell.textContent.toLowerCase();
-            row.style.display = naam.includes(filter) ? "" : "none";
-        });
+                const naam = naamCell.textContent.toLowerCase();
+                row.style.display = naam.includes(filter) ? "" : "none";
+            });
+        }, 150); // 150ms vertraging voor betere performance
     });
 });

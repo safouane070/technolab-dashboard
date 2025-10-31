@@ -1,5 +1,5 @@
 <?php
-// Verbinding maken
+// Verbinding maken met database
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -7,13 +7,13 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// Haal bestaande sectoren op voor de dropdown
+// ✅ Haal alle unieke sectoren op voor de dropdown
 $sectorenStmt = $db->query("SELECT DISTINCT sector FROM werknemers WHERE sector IS NOT NULL AND sector <> '' ORDER BY sector ASC");
 $sectoren = $sectorenStmt->fetchAll(PDO::FETCH_COLUMN);
 
 $melding = null;
 
-// Verwerking formulier
+// ✅ Verwerk formulier
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $voornaam = $_POST['voornaam'];
     $tussenvoegsel = $_POST['tussenvoegsel'] ?? null;
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($bestaat > 0) {
         $melding = '<div class="alert alert-danger text-center">Dit e-mailadres bestaat al. Gebruik een ander adres.</div>';
     } else {
-        // sector kan komen uit dropdown of nieuw veld
+        // ✅ Als er een nieuwe sector is ingevoerd, gebruik die — anders de gekozen
         if (isset($_POST['sector_nieuw']) && trim($_POST['sector_nieuw']) !== '') {
             $sector = trim($_POST['sector_nieuw']);
         } else {
@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $status = ($werkdag_ma || $werkdag_di || $werkdag_wo || $werkdag_do || $werkdag_vr) ? "Aanwezig" : "Afwezig";
 
+        // ✅ Nieuwe medewerker invoegen
         $stmt = $db->prepare("INSERT INTO werknemers 
             (voornaam, tussenvoegsel, achternaam, email, werkdag_ma, werkdag_di, werkdag_wo, werkdag_do, werkdag_vr, sector, BHV, status) 
             VALUES (:voornaam, :tussenvoegsel, :achternaam, :email, :werkdag_ma, :werkdag_di, :werkdag_wo, :werkdag_do, :werkdag_vr, :sector, :bhv, :status)");
@@ -64,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':status' => $status
         ]);
 
-
+        // ✅ Terug naar dagplanning
         header("Location: dagplanning.php");
         exit;
     }
@@ -106,10 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .days-grid { grid-template-columns: repeat(2,1fr); }
         }
         .small-muted { font-size: .85rem; color: #6c757d; }
-        .brand {
-            font-weight: 700;
-            color: #0b5ed7;
-        }
+        .brand { font-weight: 700; color: #0b5ed7; }
     </style>
 </head>
 <body>
@@ -154,9 +152,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label">Cirkels</label>
                 <select name="sector" id="sectorSelect" class="form-select" required>
                     <option value="">-- Kies sector --</option>
-                    <option value="TK">TK</option>
-                    <option value="Kiem">Kiem</option>
-                    <option value="To">To</option>
+                    <?php foreach ($sectoren as $s): ?>
+                        <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
+                    <?php endforeach; ?>
                     <option value="__andere__">Andere...</option>
                 </select>
                 <input type="text" name="sector_nieuw" id="sectorNieuw" class="form-control mt-2" placeholder="Voer nieuwe sector in" style="display:none;">
