@@ -235,6 +235,9 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
 <script>
+    setInterval(() => {
+        location.reload();
+    }, 60000);
     // Verbeterde details.js code voor popup
     document.querySelectorAll('.btn-details').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -314,6 +317,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         const t = document.getElementById('tijd-' + id);
         t.style.display = sel.value === 'Eefetjes Afwezig' ? 'inline-block' : 'none';
     }
+
 </script>
  
  
