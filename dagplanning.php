@@ -122,12 +122,23 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Dagplanning</title>
 </head>
 <body>
-<header class="header">
+
+<!-- ✅ Originele header behouden, alleen login toegevoegd -->
+<header class="header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 20px;">
     <section class="logo-container">
         <a href="#" class="logo-link">
             <img src="image/technolab.png" alt="Technolab Logo" class="logo-icone">
         </a>
     </section>
+
+    <!-- 🔹 Login of logout knop -->
+    <div class="login-btn-container">
+        <?php if(isset($_SESSION['user'])): ?>
+            <a href="logout.php" class="btn btn-outline-danger btn-sm">Uitloggen</a>
+        <?php else: ?>
+            <a href="login.php" class="btn btn-primary btn-sm">Inloggen</a>
+        <?php endif; ?>
+    </div>
 </header>
 
 <main class="main">
@@ -173,57 +184,55 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <th>Naam</th>
         <th>Status</th>
         <th>Actie</th>
-                        <th></th>
-
+        <th></th>
       </tr>
     </thead>
     <tbody>
-            <?php foreach ($werknemersStatus as $w): ?>
-                <?php
-                $status = $w['status'] ?? 'Afwezig';
-                $statusClass = match($status) {
-                    'Aanwezig' => 'status-aanwezig',
-                    'Afwezig' => 'status-afwezig',
-                    'Ziek' => 'status-ziek',
-                    'Eefetjes Afwezig' => 'status-eefetjes',
-                    default => ''
-                };
-                ?>
-                <tr class="<?= $statusClass ?>">
-                    <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
-                        <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
-                    </td>
-                    <td>
-                        <form method="post">
-                            <input type="hidden" name="id" value="<?= $w['id'] ?>">
+        <?php foreach ($werknemersStatus as $w): ?>
+            <?php
+            $status = $w['status'] ?? 'Afwezig';
+            $statusClass = match($status) {
+                'Aanwezig' => 'status-aanwezig',
+                'Afwezig' => 'status-afwezig',
+                'Ziek' => 'status-ziek',
+                'Eefetjes Afwezig' => 'status-eefetjes',
+                default => ''
+            };
+            ?>
+            <tr class="<?= $statusClass ?>">
+                <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
+                    <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
+                </td>
+                <td>
+                    <form method="post">
+                        <input type="hidden" name="id" value="<?= $w['id'] ?>">
 
-                                <select name="status"
-                                        style="width:150px;"
-                                        onchange="toggleTime(this, <?= $w['id'] ?>); this.form.submit();">
+                        <select name="status"
+                                style="width:150px;"
+                                onchange="toggleTime(this, <?= $w['id'] ?>); this.form.submit();">
 
-                                <option value="Aanwezig" <?= $status=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
-                                <option value="Afwezig" <?= $status=='Afwezig'?'selected':'' ?>>Afwezig</option>
-                                <option value="Ziek" <?= $status=='Ziek'?'selected':'' ?>>Ziek</option>
-                                <option value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
-                            </select>
-                            <input type="time" name="tijd"
-                                   id="tijd-<?= $w['id'] ?>"
-                                   value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>"
-                                   style="display:<?= $status=='Eefetjes Afwezig' ? 'inline-block' : 'none' ?>"
-                                   onchange="this.form.submit();">
-                        </form>
-                    </td>
-                    <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
-                                    <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
+                            <option value="Aanwezig" <?= $status=='Aanwezig'?'selected':'' ?>>Aanwezig</option>
+                            <option value="Afwezig" <?= $status=='Afwezig'?'selected':'' ?>>Afwezig</option>
+                            <option value="Ziek" <?= $status=='Ziek'?'selected':'' ?>>Ziek</option>
+                            <option value="Eefetjes Afwezig" <?= $status=='Eefetjes Afwezig'?'selected':'' ?>>Tijdelijk Afwezig</option>
+                        </select>
+                        <input type="time" name="tijd"
+                               id="tijd-<?= $w['id'] ?>"
+                               value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>"
+                               style="display:<?= $status=='Eefetjes Afwezig' ? 'inline-block' : 'none' ?>"
+                               onchange="this.form.submit();">
+                    </form>
+                </td>
+                <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
+                <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
 
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <br>
-    <a href="add.php"><button>➕ Voeg een medewerker toe</button></a>
+<br>
+<a href="add.php"><button>➕ Voeg een medewerker toe</button></a>
 </main>
 
 <!-- 📌 Modal -->
@@ -232,13 +241,11 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <button id="close-modal">&times;</button>
 </div>
 
-
-
 <script>
     setInterval(() => {
         location.reload();
     }, 60000);
-    // Verbeterde details.js code voor popup
+
     document.querySelectorAll('.btn-details').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -266,6 +273,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('detail-modal').style.display = 'none';
         }
     });
+
     const selectModeBtn = document.getElementById('select-mode');
     const bulkDeleteForm = document.getElementById('bulk-delete-form');
     const checkboxes = document.querySelectorAll('.select-row');
@@ -273,7 +281,6 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     let selecting = false;
 
-    // Selecteren aan/uit
     selectModeBtn.addEventListener('click', () => {
         selecting = !selecting;
         checkboxes.forEach(cb => {
@@ -285,43 +292,31 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         selectModeBtn.textContent = selecting ? 'Annuleren' : 'Selecteren';
     });
 
-    // Selecteer alles
     if (selectAll) {
         selectAll.addEventListener('change', (e) => {
             checkboxes.forEach(cb => cb.checked = e.target.checked);
         });
     }
 
-    // Confirm alert bij bulk-delete
     bulkDeleteForm.addEventListener('submit', (e) => {
         const selected = Array.from(checkboxes).filter(cb => cb.checked);
         if (selected.length === 0) {
             alert("Selecteer eerst minstens één medewerker om te verwijderen.");
-            e.preventDefault(); // stop het submitten
+            e.preventDefault();
             return;
         }
 
         const confirmDelete = confirm(`Weet je zeker dat je ${selected.length} medewerker(s) wilt verwijderen?`);
-        if (!confirmDelete) {
-            e.preventDefault(); // stop het submitten als gebruiker annuleert
-        }
+        if (!confirmDelete) e.preventDefault();
     });
 
-
-
-    selectAll.addEventListener('change', (e) => {
-        checkboxes.forEach(cb => cb.checked = e.target.checked);
-    });
-
-        function toggleTime(sel, id) {
+    function toggleTime(sel, id) {
         const t = document.getElementById('tijd-' + id);
         t.style.display = sel.value === 'Eefetjes Afwezig' ? 'inline-block' : 'none';
     }
-
 </script>
- 
- 
 
 <script src="js/dagplanning.js"></script>
 </body>
 </html>
+
