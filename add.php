@@ -1,11 +1,43 @@
 <?php
+
+session_start();
+
+// ✅ Alleen admin mag sectoren verwijderen
+$isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 // Verbinding maken met database
+
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Fout!: " . $e->getMessage());
 }
+
+// Admin wil sector verwijderen
+$warningMessage = null;
+$sectorToDelete = null;
+
+if ($isAdmin && isset($_GET['delete_sector'])) {
+    $sectorToDelete = trim($_GET['delete_sector']);
+    if ($sectorToDelete !== '') {
+        // Check hoeveel personen deze sector gebruiken
+        $countStmt = $db->prepare("SELECT COUNT(*) FROM werknemers WHERE sector = :sector");
+        $countStmt->execute([':sector' => $sectorToDelete]);
+        $numPersons = $countStmt->fetchColumn();
+
+        if (!isset($_GET['confirm']) && $numPersons > 0) {
+            // Waarschuwing tonen
+            $warningMessage = "Let op! Er zijn {$numPersons} persoon/personen die deze sector hebben. Als je doorgaat, worden hun sectoren leeg gezet.";
+        } else {
+            // Admin bevestigt → sector verwijderen door sector op NULL te zetten
+            $updateStmt = $db->prepare("UPDATE werknemers SET sector = NULL WHERE sector = :sector");
+            $updateStmt->execute([':sector' => $sectorToDelete]);
+            $warningMessage = "<div class='alert alert-success text-center'>Sector <strong>{$sectorToDelete}</strong> is verwijderd en de medewerkers zijn bijgewerkt.</div>";
+            $sectorToDelete = null; // reset zodat dropdown niet meer delete link toont
+        }
+    }
+}
+
 
 // ✅ Haal alle unieke sectoren op voor de dropdown
 $sectorenStmt = $db->query("SELECT DISTINCT sector FROM werknemers WHERE sector IS NOT NULL AND sector <> '' ORDER BY sector ASC");
@@ -114,7 +146,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="add-card shadow-lg p-4 rounded-4 bg-white">
     <?php if ($melding) echo $melding; ?>
-
+    <?php if ($warningMessage): ?>
+        <div class="alert alert-warning text-center mb-3">
+            <?= $warningMessage ?>
+            <?php if ($sectorToDelete): ?>
+                <div class="mt-2">
+                    <a href="?delete_sector=<?= urlencode($sectorToDelete) ?>&confirm=1"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Weet je zeker dat je deze sector wilt verwijderen? De medewerkers blijven bestaan, maar hun sector wordt leeg gezet.');">
+                        Bevestig verwijderen
+                    </a>
+                    <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-sm btn-secondary">Annuleren</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     <div class="d-flex align-items-center mb-3">
         <div class="me-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#0b5ed7" class="bi bi-person-plus" viewBox="0 0 16 16">
@@ -148,15 +194,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="email" name="email" class="form-control" required>
             </div>
 
+
             <div class="col-md-6">
                 <label class="form-label">Cirkels</label>
-                <select name="sector" id="sectorSelect" class="form-select" required>
-                    <option value="">-- Kies sector --</option>
-                    <?php foreach ($sectoren as $s): ?>
-                        <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
-                    <?php endforeach; ?>
-                    <option value="__andere__">Andere...</option>
-                </select>
+                <div class="d-flex flex-column gap-2">
+                    <div class="position-relative">
+                        <select name="sector" id="sectorSelect" class="form-select" required>
+                            <option value="">-- Kies sector --</option>
+                            <?php foreach ($sectoren as $s): ?>
+                                <option value="<?= ($s) ?>"><?= ($s) ?></option>
+                            <?php endforeach; ?>
+                            <option value="__andere__">Andere...</option>
+                        </select>
+                    </div>
+
+                    <?php if ($isAdmin): ?>
+                        <div class="mt-2">
+                            <h6 class="small-muted mb-1">Sectoren beheren:</h6>
+                            <?php foreach ($sectoren as $s): ?>
+                                <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1 bg-light">
+                                    <span><?= ($s) ?></span>
+                                    <a href="?delete_sector=<?= urlencode($s) ?>"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Weet je zeker dat je de sector wilt verwijderen?')">
+                                    X
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+
                 <input type="text" name="sector_nieuw" id="sectorNieuw" class="form-control mt-2" placeholder="Voer nieuwe sector in" style="display:none;">
                 <div class="small-muted mt-1">Kies een bestaande sector of voeg een nieuwe toe.</div>
             </div>
