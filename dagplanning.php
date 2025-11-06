@@ -1,4 +1,13 @@
 <?php
+session_start();
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    // Blijf op dezelfde pagina, maar zonder ?logout=1 in de URL
+    header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
+    exit;
+}
+
 // 📌 Database connectie
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
@@ -133,11 +142,12 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- 🔹 Login of logout knop -->
     <div class="login-btn-container">
-        <?php if(isset($_SESSION['user'])): ?>
-            <a href="logout.php" class="btn btn-outline-danger btn-sm">Uitloggen</a>
+        <?php if(isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+            <a href="?logout=1" class="btn btn-outline-danger btn-sm">Uitloggen</a>
         <?php else: ?>
             <a href="login.php" class="btn btn-primary btn-sm">Inloggen</a>
         <?php endif; ?>
+
     </div>
 </header>
 
@@ -168,7 +178,9 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <a href="week.php"><button class="toggle">Week</button></a>
             </div>
             <div class="toolbar-right" style="display:flex;gap:10px;">
-                <button id="select-mode" class="btn btn-outline-secondary btn-sm">Selecteren</button>
+                <?php if(isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+                    <button id="select-mode" class="btn btn-outline-secondary btn-sm">Selecteren</button>
+                <?php endif; ?>
                 <form method="post" id="bulk-delete-form" style="display:none;">
                     <input type="hidden" name="bulk_delete" value="1">
                     <button type="submit" class="btn btn-danger btn-sm">Verwijderen</button>
@@ -184,7 +196,10 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <th>Naam</th>
         <th>Status</th>
         <th>Actie</th>
-        <th></th>
+          <?php if(isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+              <th></th>
+          <?php endif; ?>
+
       </tr>
     </thead>
     <tbody>
@@ -224,7 +239,9 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </form>
                 </td>
                 <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
-                <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
+                <?php if(isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+                    <td><input type="checkbox" name="selected_ids[]" value="<?= $w['id'] ?>" class="select-row" form="bulk-delete-form" style="display:none;"></td>
+                <?php endif; ?>
             </tr>
         <?php endforeach; ?>
     </tbody>
