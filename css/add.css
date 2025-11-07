@@ -1,149 +1,337 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-:root {
-  --green: #00b140;       /* Technolab groen */
-  --purple: #8e44ad;      /* Technolab paars */
-  --yellow: #ffd100;      /* Technolab geel */
-  --bg-overlay: rgba(0,0,0,0.6);
-  --bg-card: #ffffff;
-  --text-dark: #111827;
-  --border-radius: 1rem;
-  --font: 'Inter', sans-serif;
-}
-
+/* Algemene body styling */
 body {
-  margin: 0;
-  font-family: var(--font);
-  background: #f0f4f8;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+    color: #333;
 }
 
+/* Kaart container */
+.add-card {
+    max-width: 950px;
+    margin: 50px auto;
+    padding: 30px 40px;
+    border-radius: 15px;
+    background-color: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Headers */
+h2 {
+    font-size: 28px;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.small-muted {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+/* Form sections */
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section h5, .form-section h6 {
+    margin-bottom: 10px;
+    color: #34495e;
+    font-weight: 600;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* Inputs en selects */
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0b5ed7;
+    outline: none;
+    box-shadow: 0 0 5px rgba(11,94,215,0.3);
+}
+
+/* Knoppen */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-success {
+    background-color: #27ae60;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #219150;
+}
+
+.btn-outline-secondary {
+    background-color: transparent;
+    border: 1px solid #95a5a6;
+    color: #34495e;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #ecf0f1;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
+/* Checkbox styling */
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-check-input {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Grid voor werkdagen */
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* Sectoren beheren */
+.sector-list, .d-flex.flex-column.gap-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.d-flex.justify-content-between.align-items-center {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background-color: #f1f3f5;
+    border: 1px solid #dcdcdc;
+}
+
+/* Overlay popup */
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-overlay);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(4px);
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .popup-card {
-  background: var(--bg-card);
-  border-radius: var(--border-radius);
-  width: 100%;
-  max-width: 500px;
-  padding: 2rem;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-  animation: popIn 0.3s ease-out;
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
-@keyframes popIn {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+/* Overlay form */
+.popup-card form .form-section {
+    margin-bottom: 15px;
 }
 
-h2 {
-  text-align: center;
-  color: var(--purple);
-  margin-bottom: 2rem;
+/* Responsive */
+@media (max-width: 768px) {
+    .form-section.row.g-3 {
+        flex-direction: column;
+    }
+    .days-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
 }
 
-.form-section {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #f9f9f9;
-  border-left: 5px solid var(--yellow);
-  border-radius: var(--border-radius);
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
 }
 
-label {
-  display: block;
-  margin-top: 1rem;
-  font-weight: 500;
-  color: var(--text-dark);
+/* Popup modal */
+.popup-card {
+    background-color: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh; /* popup niet hoger dan 80% van scherm */
+    display: flex;
+    flex-direction: column;
+    padding: 25px 30px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    position: relative;
+    transform: translateY(-20px);
+    opacity: 0;
+    animation: slideIn 0.3s forwards;
 }
 
-input[type="text"],
-input[type="email"],
-select,
-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 0.25rem;
-  border-radius: var(--border-radius);
-  border: 1px solid #ddd;
-  font-size: 1rem;
-  transition: all 0.3s;
+/* Animaties */
+@keyframes fadeIn {
+    from { background: rgba(0,0,0,0); }
+    to { background: rgba(0,0,0,0.5); }
 }
 
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(0,177,64,0.2);
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+/* Header */
+.popup-card h2 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 
-.chips label {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 9999px;
-  background: #eee;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 0.9rem;
+/* Text */
+.popup-card p {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 15px;
 }
 
-.chips input[type="checkbox"] {
-  accent-color: var(--green);
+/* Scrollable medewerker lijst */
+.popup-card .medewerker-lijst {
+    flex: 1; /* neemt resterende ruimte */
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding-right: 5px; /* ruimte voor scrollbar */
 }
 
-.chips input:checked + label {
-  background: var(--green);
-  color: #fff;
+/* Individuele medewerker */
+.popup-card .medewerker-item {
+    margin-bottom: 12px;
 }
 
-button[type="submit"] {
-  width: 100%;
-  padding: 0.8rem;
-  border: none;
-  border-radius: var(--border-radius);
-  background: var(--green);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: all 0.3s;
+.popup-card .medewerker-item strong {
+    display: block;
+    margin-bottom: 5px;
 }
 
-button[type="submit"]:hover {
-  background: #00a037;
-  transform: translateY(-2px);
+/* Select in modal */
+.popup-card select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    transition: all 0.2s;
 }
 
-.back-link {
-  display: block;
-  text-align: center;
-  margin-top: 1.5rem;
-  color: var(--purple);
-  font-weight: 500;
-  text-decoration: none;
+.popup-card select:focus {
+    border-color: #0b5ed7;
+    outline: none;
+    box-shadow: 0 0 6px rgba(11,94,215,0.25);
 }
 
-.back-link:hover {
-  color: var(--green);
-  text-decoration: underline;
+/* Buttons container */
+.popup-card .btn-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Buttons */
+.popup-card .btn-outline-secondary {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.popup-card .btn-outline-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.popup-card .btn-danger {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.popup-card .btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .popup-card {
+        padding: 20px;
+        max-height: 90vh;
+    }
 }
