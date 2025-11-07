@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 17 okt 2025 om 11:33
+-- Gegenereerd op: 07 nov 2025 om 10:07
 -- Serverversie: 10.4.32-MariaDB
 -- PHP-versie: 8.1.25
 
@@ -26,6 +26,26 @@ USE `technolab-dashboard`;
 -- --------------------------------------------------------
 
 --
+-- Tabelstructuur voor tabel `admins`
+--
+
+CREATE TABLE `admins` (
+  `id` int(11) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `admins`
+--
+
+INSERT INTO `admins` (`id`, `password`) VALUES
+(9, '1234'),
+(10, 'Technolab'),
+(11, 'technoallday');
+
+-- --------------------------------------------------------
+
+--
 -- Tabelstructuur voor tabel `week_planning`
 --
 
@@ -44,46 +64,44 @@ CREATE TABLE `week_planning` (
 --
 
 INSERT INTO `week_planning` (`id`, `werknemer_id`, `weeknummer`, `jaar`, `dag`, `status`, `tijdelijk_tot`) VALUES
-(39, 29, 40, 2025, 'di', 'Op de school', NULL),
-(42, 29, 40, 2025, 'vr', 'Op de school', NULL),
-(47, 29, 40, 2025, 'do', 'Op de school', NULL),
-(240, 29, 41, 2025, 'ma', 'Op de school', NULL),
-(304, 29, 41, 2025, 'di', 'Op de school', NULL),
-(353, 29, 41, 2025, 'we', 'Eefetjes Afwezig', NULL),
-(375, 29, 41, 2025, 'do', 'Eefetjes Afwezig', NULL),
-(400, 29, 41, 2025, 'wo', 'Eefetjes Afwezig', NULL),
-(443, 29, 42, 2025, 'di', 'Ziek', NULL),
-(449, 29, 43, 2025, 'ma', 'Afwezig', NULL),
-(451, 29, 51, 2025, 'ma', 'Afwezig', NULL),
-(460, 29, 41, 2025, 'vr', 'Aanwezig', NULL),
-(473, 29, 42, 2025, 'ma', 'Ziek', NULL),
-(581, 29, 42, 2025, 'wo', 'Aanwezig', NULL),
-(585, 29, 42, 2025, 'vr', 'Afwezig', NULL),
-(640, 32, 42, 2025, 'wo', 'Aanwezig', NULL),
-(642, 32, 42, 2025, 'do', 'Afwezig', NULL),
-(644, 32, 42, 2025, 'vr', 'Eefetjes Afwezig', NULL),
-(663, 37, 42, 2025, 'wo', 'Afwezig', NULL),
-(664, 38, 42, 2025, 'wo', 'Afwezig', NULL),
-(665, 38, 42, 2025, 'do', 'Afwezig', NULL),
-(666, 37, 42, 2025, 'do', 'Afwezig', NULL),
-(669, 38, 42, 2025, 'vr', 'Eefetjes Afwezig', NULL),
-(670, 37, 42, 2025, 'vr', 'Ziek', NULL),
-(677, 38, 42, 2025, 'di', 'Eefetjes Afwezig', NULL),
-(679, 32, 42, 2025, 'di', 'Eefetjes Afwezig', NULL),
-(680, 37, 42, 2025, 'di', 'Eefetjes Afwezig', NULL),
-(682, 38, 42, 2025, 'ma', 'Ziek', NULL),
-(683, 32, 42, 2025, 'ma', 'Ziek', NULL),
-(684, 37, 42, 2025, 'ma', 'Ziek', NULL),
-(686, 32, 44, 2025, 'ma', 'Aanwezig', NULL),
-(705, 29, 42, 2025, 'do', 'Afwezig', NULL),
-(712, 40, 42, 2025, 'vr', 'Aanwezig', NULL),
-(713, 41, 42, 2025, 'vr', 'Afwezig', NULL),
-(715, 40, 42, 2025, 'ma', 'Aanwezig', NULL),
-(716, 41, 42, 2025, 'ma', 'Aanwezig', NULL),
-(717, 40, 42, 2025, 'di', 'Aanwezig', NULL),
-(718, 41, 42, 2025, 'di', 'Afwezig', NULL),
-(719, 40, 42, 2025, 'wo', 'Aanwezig', NULL),
-(720, 41, 42, 2025, 'wo', 'Afwezig', NULL);
+(777, 43, 44, 2025, 'ma', 'Afwezig', NULL),
+(778, 44, 44, 2025, 'ma', 'Aanwezig', NULL),
+(780, 43, 44, 2025, 'wo', 'Ziek', NULL),
+(781, 44, 44, 2025, 'wo', 'Ziek', NULL),
+(784, 43, 44, 2025, 'do', 'Aanwezig', NULL),
+(785, 44, 44, 2025, 'do', 'Eefetjes Afwezig', '2025-10-30 15:50:00'),
+(787, 43, 44, 2025, 'di', 'Aanwezig', NULL),
+(788, 44, 44, 2025, 'di', 'Aanwezig', NULL),
+(793, 43, 46, 2025, 'di', 'Afwezig', NULL),
+(804, 48, 44, 2025, 'wo', 'Ziek', NULL),
+(806, 48, 44, 2025, 'do', 'Afwezig', NULL),
+(809, 43, 44, 2025, 'vr', 'Aanwezig', NULL),
+(810, 44, 44, 2025, 'vr', 'Aanwezig', NULL),
+(812, 48, 44, 2025, 'vr', 'Aanwezig', NULL),
+(825, 43, 47, 2025, 'wo', 'Eefetjes Afwezig', NULL),
+(828, 52, 44, 2025, 'vr', 'Afwezig', NULL),
+(833, 43, 45, 2025, 'ma', 'Aanwezig', NULL),
+(834, 44, 45, 2025, 'ma', 'Aanwezig', NULL),
+(836, 48, 45, 2025, 'ma', 'Aanwezig', NULL),
+(837, 52, 45, 2025, 'ma', 'Afwezig', NULL),
+(853, 43, 45, 2025, 'di', 'Aanwezig', NULL),
+(854, 44, 45, 2025, 'di', 'Aanwezig', NULL),
+(856, 48, 45, 2025, 'di', 'Afwezig', NULL),
+(857, 52, 45, 2025, 'di', 'Afwezig', NULL),
+(862, 43, 45, 2025, 'wo', 'Aanwezig', NULL),
+(863, 44, 45, 2025, 'wo', 'Aanwezig', NULL),
+(865, 48, 45, 2025, 'wo', 'Afwezig', NULL),
+(866, 52, 45, 2025, 'wo', 'Afwezig', NULL),
+(871, 43, 45, 2025, 'do', 'Aanwezig', NULL),
+(872, 44, 45, 2025, 'do', 'Afwezig', NULL),
+(874, 48, 45, 2025, 'do', 'Afwezig', NULL),
+(875, 52, 45, 2025, 'do', 'Afwezig', NULL),
+(880, 43, 45, 2025, 'vr', 'Aanwezig', NULL),
+(881, 44, 45, 2025, 'vr', 'Aanwezig', NULL),
+(883, 48, 45, 2025, 'vr', 'Aanwezig', NULL),
+(884, 52, 45, 2025, 'vr', 'Afwezig', NULL),
+(897, 57, 45, 2025, 'do', 'Aanwezig', NULL),
+(898, 57, 45, 2025, 'vr', 'Afwezig', NULL);
 
 -- --------------------------------------------------------
 
@@ -102,7 +120,7 @@ CREATE TABLE `werknemers` (
   `werkdag_wo` tinyint(1) DEFAULT 0,
   `werkdag_do` tinyint(1) DEFAULT 0,
   `werkdag_vr` tinyint(1) DEFAULT 0,
-  `sector` varchar(50) NOT NULL,
+  `sector` varchar(50) DEFAULT NULL,
   `BHV` tinyint(1) DEFAULT 0,
   `status` enum('Ziek','Aanwezig','Op de school','Afwezig','Eefetjes Afwezig') DEFAULT 'Aanwezig',
   `status_ma` enum('Aanwezig','Afwezig','Ziek','Op de school','Eefetjes Afwezig') DEFAULT 'Afwezig',
@@ -118,16 +136,21 @@ CREATE TABLE `werknemers` (
 --
 
 INSERT INTO `werknemers` (`id`, `voornaam`, `tussenvoegsel`, `achternaam`, `email`, `werkdag_ma`, `werkdag_di`, `werkdag_wo`, `werkdag_do`, `werkdag_vr`, `sector`, `BHV`, `status`, `status_ma`, `status_di`, `status_wo`, `status_do`, `status_vr`, `tijdelijk_tot`) VALUES
-(29, 'martijn', 'de', 'amr', 'amro@gmail.com', 1, 1, 1, 0, 1, 'ICT', 1, 'Eefetjes Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
-(32, 'Robert', '', 'Commerell', 'amr@technolableiden.nl', 0, 1, 1, 1, 1, 'ICT', 1, 'Aanwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
-(37, 'martijn', '', 'martijn', 'amr@technolableiden.nl', 1, 1, 0, 1, 1, 'ICT', 0, 'Aanwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
-(38, 'martijn', '', 'Anwer', 'amr@technolableiden.nl', 1, 1, 0, 1, 1, 'ICT', 0, 'Aanwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
-(40, 'Amr', '', 'amr', 'amro@gmail.com', 1, 1, 1, 1, 0, 'ICT', 1, 'Aanwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
-(41, 'Anwer', '', 'Commerell', 'amr@technolableiden.nl', 1, 0, 0, 0, 0, 'ICT', 1, 'Aanwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL);
+(43, 'Amr', '', 'amr', 'amr@technolableiden.nl', 0, 1, 1, 0, 1, 'TK', 0, 'Eefetjes Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
+(44, 'Anwer', '', 'martijn', 'amr@technolableiden.nl', 1, 1, 1, 0, 1, 'TK', 1, 'Eefetjes Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
+(48, 'Anwer', '', 'Anwer', 'amr@technolableiden.nl', 1, 0, 0, 0, 1, 'Keim', 1, 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
+(52, 'Anwer', '', 'Anwer', 'admin@example.com', 0, 0, 0, 0, 0, 'keim', 1, 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL),
+(57, 'Amr', 'de', 'martijn', '302920978@student.rocmondriaan.nl', 0, 0, 0, 1, 0, 'ICt', 1, 'Aanwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', 'Afwezig', NULL);
 
 --
 -- Indexen voor geëxporteerde tabellen
 --
+
+--
+-- Indexen voor tabel `admins`
+--
+ALTER TABLE `admins`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexen voor tabel `week_planning`
@@ -147,16 +170,22 @@ ALTER TABLE `werknemers`
 --
 
 --
+-- AUTO_INCREMENT voor een tabel `admins`
+--
+ALTER TABLE `admins`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT voor een tabel `week_planning`
 --
 ALTER TABLE `week_planning`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=721;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=899;
 
 --
 -- AUTO_INCREMENT voor een tabel `werknemers`
 --
 ALTER TABLE `werknemers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- Beperkingen voor geëxporteerde tabellen

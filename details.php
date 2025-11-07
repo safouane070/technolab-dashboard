@@ -45,9 +45,9 @@ $dagen = [
 </head>
 <body>
     <div class="card">
-        <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
+        <h2><?= ($volledigeNaam) ?></h2>
 
-        <p><i class="bi bi-envelope"></i> <strong>Email:</strong> <?= htmlspecialchars($werknemer['email']) ?></p>
+        <p><i class="bi bi-envelope"></i> <strong>Email:</strong> <?= ($werknemer['email']) ?></p>
 
         <p>
             <i class="bi bi-activity"></i> <strong>Status:</strong>
@@ -57,12 +57,12 @@ $dagen = [
                 <?= $werknemer['status'] === 'Ziek' ? 'status-ziek' : '' ?>
                 <?= $werknemer['status'] === 'Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
             ">
-                <?= htmlspecialchars($werknemer['status']) ?>
+                <?= ($werknemer['status']) ?>
             </span>
         </p>
 
         <p><i class="bi bi-diagram-3"></i> <strong>Sector:</strong>
-            <?= htmlspecialchars($werknemer['sector']) ?></p>
+            <?= ($werknemer['sector']) ?></p>
 
         <p>
             <i class="bi bi-shield-check"></i> <strong>BHV:</strong>
