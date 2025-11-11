@@ -98,7 +98,7 @@ $werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Main -->
     <main class="main">
         <div class="main-header">
-            <h1>Absence List</h1>
+            <h1></h1>
             <div class="legend">
                 <div><span class="dot status-aanwezig"></span> Aanwezig</div>
                 <div><span class="dot status-afwezig"></span> Afwezig</div>

@@ -56,6 +56,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && 
         $sectorToDelete = null;
     }
 }
+// Nieuwe sector toevoegen (alleen admin)
+if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sector_toevoegen'])) {
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("Ongeldige actie (CSRF).");
+    }
+
+    $nieuweSector = trim($_POST['nieuwe_sector']);
+    if ($nieuweSector !== '') {
+        // Check of de sector al bestaat
+        $check = $db->prepare("SELECT COUNT(*) FROM werknemers WHERE sector = :sector");
+        $check->execute([':sector' => $nieuweSector]);
+        if ($check->fetchColumn() == 0) {
+            // Voeg de sector toe door een lege entry te maken (zonder medewerker)
+            $insert = $db->prepare("INSERT INTO werknemers (sector) VALUES (:sector)");
+            $insert->execute([':sector' => $nieuweSector]);
+            $_SESSION['flash_message'] = "<div class='alert alert-success text-center'>Sector <strong>" . htmlspecialchars($nieuweSector) . "</strong> is toegevoegd.</div>";
+        } else {
+            $_SESSION['flash_message'] = "<div class='alert alert-warning text-center'>Sector <strong>" . htmlspecialchars($nieuweSector) . "</strong> bestaat al.</div>";
+        }
+        header("Location: add.php");
+        exit;
+    }
+}
 
 // Admin vraagt om sector verwijderen
 if ($isAdmin && isset($_GET['delete_sector'])) {
@@ -313,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete'])) {
             <select name="sector" id="sectorSelect" class="form-select" required>
                 <option value="">-- Kies sector --</option>
                 <?php foreach ($sectoren as $s): ?>
-                    <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
+                    <option value="<?= ($s) ?>"><?= ($s) ?></option>
                 <?php endforeach; ?>
                 <option value="__andere__">Andere...</option>
             </select>
@@ -331,18 +354,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete'])) {
 
 <!-- Admin sector beheer -->
 <?php if($isAdmin): ?>
-<div class="form-section mt-3 add-card">
-    <h5 class="mb-2">Sectoren beheren</h5>
-    <div class="sector-list">
-        <?php foreach ($sectoren as $s): ?>
-        <div class="sector-item">
-            <span><?= htmlspecialchars($s) ?></span>
-            <a href="?delete_sector=<?= urlencode($s) ?>" class="btn btn-sm btn-outline-danger">X</a>
+    <div class="form-section mt-3 add-card">
+        <h5 class="mb-2">Sectoren beheren</h5>
+
+        <!-- Formulier om nieuwe sector toe te voegen -->
+        <form method="post" class="d-flex gap-2 mb-3">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+            <input type="text" name="nieuwe_sector" class="form-control" placeholder="Nieuwe sector toevoegen..." required>
+            <button type="submit" name="sector_toevoegen" class="btn btn-success">+</button>
+        </form>
+
+        <!-- Lijst met bestaande sectoren -->
+        <div class="sector-list">
+            <?php foreach ($sectoren as $s): ?>
+                <div class="sector-item d-flex justify-content-between align-items-center mb-2">
+                    <span><?= ($s) ?></span>
+                    <a href="?delete_sector=<?= urlencode($s) ?>" class="btn btn-sm btn-outline-danger">X</a>
+                </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
     </div>
-</div>
 <?php endif; ?>
+
 
 <!-- Overlay popup voor verwijderen sector -->
 <?php if($sectorToDelete && count($medewerkers) > 0): ?>
@@ -350,7 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete'])) {
     <div class="popup-card">
         <!-- Header met close-knop -->
         <div class="popup-header">
-            Sector verwijderen: <?= htmlspecialchars($sectorToDelete) ?>
+            Sector verwijderen: <?= ($sectorToDelete) ?>
             <button type="button" class="close-btn" onclick="document.querySelector('.overlay').style.display='none'">&times;</button>
         </div>
 
@@ -359,16 +392,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete'])) {
             <p>Deze sector heeft <strong><?= count($medewerkers) ?></strong> medewerker(s). Kies per medewerker een nieuwe sector:</p>
             <form method="post">
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                <input type="hidden" name="sector_to_delete" value="<?= htmlspecialchars($sectorToDelete) ?>">
+                <input type="hidden" name="sector_to_delete" value="<?= ($sectorToDelete) ?>">
 
                 <div class="medewerker-lijst">
                     <?php foreach($medewerkers as $i=>$m): ?>
                         <div class="form-section medewerker-item">
-                            <strong><?= htmlspecialchars($m['voornaam'].' '.$m['tussenvoegsel'].' '.$m['achternaam'].' ('.$m['email'].')') ?></strong>
+                            <strong><?= ($m['voornaam'].' '.$m['tussenvoegsel'].' '.$m['achternaam'].' ('.$m['email'].')') ?></strong>
                             <select name="medewerker_sector[<?= $i ?>]">
                                 <option value="__leeg__">(Geen, laat leeg)</option>
                                 <?php foreach($sectoren as $s): if($s !== $sectorToDelete): ?>
-                                    <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
+                                    <option value="<?= ($s) ?>"><?= ($s) ?></option>
                                 <?php endif; endforeach; ?>
                             </select>
                         </div>
