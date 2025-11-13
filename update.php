@@ -6,7 +6,7 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// Ophalen van de werknemer via GET id
+// Ophalen werknemer via GET id
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Geen geldig ID opgegeven.");
 }
@@ -20,9 +20,13 @@ if (!$werknemer) {
     die("Werknemer niet gevonden.");
 }
 
-// Haal unieke sectoren op om in de dropdown te tonen
-$sectorenStmt = $db->query("SELECT DISTINCT sector FROM werknemers WHERE sector IS NOT NULL AND sector <> '' ORDER BY sector ASC");
-$sectoren = $sectorenStmt->fetchAll(PDO::FETCH_COLUMN);
+// Haal bestaande sectoren op uit JSON-bestand of database (afhankelijk van implementatie)
+$sectorenJsonFile = __DIR__ . '/sectoren.json';
+$sectoren = [];
+if (file_exists($sectorenJsonFile)) {
+    $sectoren = json_decode(file_get_contents($sectorenJsonFile), true);
+    if (!is_array($sectoren)) $sectoren = [];
+}
 
 // ✅ Update uitvoeren bij POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,9 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $achternaam = $_POST['achternaam'];
     $email = $_POST['email'];
 
-    // sector kan komen uit dropdown of nieuw ingevuld veld
+    // Nieuwe sector invoer afhandelen
     if (isset($_POST['sector_nieuw']) && trim($_POST['sector_nieuw']) !== '') {
         $sector = trim($_POST['sector_nieuw']);
+
+        // Voeg nieuwe sector toe aan JSON als die nog niet bestaat
+        if (!in_array($sector, $sectoren)) {
+            $sectoren[] = $sector;
+            file_put_contents($sectorenJsonFile, json_encode($sectoren, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
     } else {
         $sector = $_POST['sector'];
     }
@@ -47,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $werkdag_do = isset($_POST['werkdag_do']) ? 1 : 0;
     $werkdag_vr = isset($_POST['werkdag_vr']) ? 1 : 0;
 
+    // Update werknemer in database
     $stmt = $db->prepare("UPDATE werknemers SET 
         voornaam = :voornaam,
         tussenvoegsel = :tussenvoegsel,
@@ -80,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="nl">
@@ -136,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div>
             <!-- Hier tonen we de volledige naam van de werknemer als titel -->
-            <h2 class="mb-0"><?= htmlspecialchars($werknemer['voornaam'] . ' ' . $werknemer['achternaam']) ?></h2>
+            <h2 class="mb-0"><?= ($werknemer['voornaam'] . ' ' . $werknemer['achternaam']) ?></h2>
             <div class="small-muted">Bewerk de gegevens</div>
         </div>
     </div>
@@ -145,20 +157,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row g-3 form-section">
             <div class="col-md-4">
                 <label class="form-label">Voornaam</label>
-                <input type="text" name="voornaam" class="form-control" value="<?= htmlspecialchars($werknemer['voornaam']) ?>" required>
+                <input type="text" name="voornaam" class="form-control" value="<?= ($werknemer['voornaam']) ?>" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Tussenvoegsel</label>
-                <input type="text" name="tussenvoegsel" class="form-control" value="<?= htmlspecialchars($werknemer['tussenvoegsel']) ?>">
+                <input type="text" name="tussenvoegsel" class="form-control" value="<?= ($werknemer['tussenvoegsel']) ?>">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Achternaam</label>
-                <input type="text" name="achternaam" class="form-control" value="<?= htmlspecialchars($werknemer['achternaam']) ?>" required>
+                <input type="text" name="achternaam" class="form-control" value="<?= ($werknemer['achternaam']) ?>" required>
             </div>
 
             <div class="col-12 col-md-6">
                 <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($werknemer['email']) ?>" required>
+                <input type="email" name="email" class="form-control" value="<?= ($werknemer['email']) ?>" required>
             </div>
 
             <div class="col-12 col-md-6">
@@ -171,10 +183,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $huidige = $werknemer['sector'] ?? '';
                     $huidige_in_lijst = in_array($huidige, $sectoren);
                     if ($huidige !== '' && !$huidige_in_lijst): ?>
-                        <option value="<?= htmlspecialchars($huidige) ?>" selected><?= htmlspecialchars($huidige) ?> (huidig)</option>
+                        <option value="<?= ($huidige) ?>" selected><?= ($huidige) ?> (huidig)</option>
                     <?php endif; ?>
                     <?php foreach ($sectoren as $s): ?>
-                        <option value="<?= htmlspecialchars($s) ?>" <?= $s === $huidige ? 'selected' : '' ?>><?= htmlspecialchars($s) ?></option>
+                        <option value="<?= ($s) ?>" <?= $s === $huidige ? 'selected' : '' ?>><?= ($s) ?></option>
                     <?php endforeach; ?>
                     <option value="__andere__">Andere...</option>
                 </select>
