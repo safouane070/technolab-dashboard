@@ -135,7 +135,11 @@ try {
             <div> <h2>Weekplanning Week <?= $weeknummer ?></h2></div>
             <div class="filter-right">
                 <a href="?week=<?= $weekOffset-1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_left</span></button></a>
-                <span class="date-label"><?= $startOfWeek->format('d M Y') ?> - <?= (clone $startOfWeek)->modify('+4 days')->format('d M Y') ?></span>
+                <?php
+                $isCurrentWeek = ($weeknummer == date('W') && $jaar == date('o')); ?>
+                <span class="date-label" style="<?= $isCurrentWeek ? 'color:#007bff; font-weight:600;' : '' ?>">
+                    <?= $startOfWeek->format('d M Y') ?> - <?= (clone $startOfWeek)->modify('+4 days')->format('d M Y') ?>
+                </span>
                 <a href="?week=<?= $weekOffset+1 ?>"><button class="icon-button"><span class="material-symbols-outlined">chevron_right</span></button></a>
             </div>
 
