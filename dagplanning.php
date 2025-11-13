@@ -301,7 +301,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!--  Modal -->
 <div id="detail-modal">
     <div id="modal-content"></div>
-    <button id="close-modal">&times;</button>
+    <a id="close-modal"></a>
 </div>
 
 <script>
