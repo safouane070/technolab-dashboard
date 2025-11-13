@@ -130,6 +130,31 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="css/nav.css" rel="stylesheet"/>
     <title>Dagplanning</title>
 </head>
+<style>
+    .day-btn {
+        border-radius: 25px;
+        padding: 6px 18px;
+        border: 1px solid #ccc;
+        color: #444;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .day-btn:hover {
+        background-color: #e2e6ea;
+        border-color: #999;
+        color: #000;
+    }
+
+    .active-day {
+        background-color: #007bff !important; /* blauw */
+        color: white !important;
+        border-color: #007bff !important;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    }
+
+</style>
 <body>
 
 <!--  Originele header behouden, alleen login toegevoegd -->
@@ -153,14 +178,35 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <main class="main">
     <div class="page-header">
-        <h4><?= $dagDatum->format('l d-m-Y') ?> </h4>
-        <div class="day-nav" style="margin:10px 0;">
-            <a href="?dag=ma" class="btn btn-outline-secondary btn-sm">Ma</a>
-            <a href="?dag=di" class="btn btn-outline-secondary btn-sm">Di</a>
-            <a href="?dag=wo" class="btn btn-outline-secondary btn-sm">Wo</a>
-            <a href="?dag=do" class="btn btn-outline-secondary btn-sm">Do</a>
-            <a href="?dag=vr" class="btn btn-outline-secondary btn-sm">Vr</a>
+        <?php
+        // 🇳🇱 Nederlandse dagnaam
+        $dagnamen = [
+            'Monday' => 'Maandag',
+            'Tuesday' => 'Dinsdag',
+            'Wednesday' => 'Woensdag',
+            'Thursday' => 'Donderdag',
+            'Friday' => 'Vrijdag',
+            'Saturday' => 'Zaterdag',
+            'Sunday' => 'Zondag'
+        ];
+        $dagNaamNL = $dagnamen[$dagDatum->format('l')] ?? $dagDatum->format('l');
+        ?>
+
+        <h4><?= $dagNaamNL . ' ' . $dagDatum->format('d-m-Y') ?></h4>
+
+        <div class="day-nav d-flex justify-content-center gap-2 flex-wrap my-3">
+            <?php
+            $dagen = ['ma' => 'Ma', 'di' => 'Di', 'wo' => 'Wo', 'do' => 'Do', 'vr' => 'Vr'];
+            foreach ($dagen as $code => $label):
+                $isActive = ($dag === $code);
+                ?>
+                <a href="?dag=<?= $code ?>"
+                   class="btn btn-sm day-btn <?= $isActive ? 'active-day' : '' ?>">
+                    <?= $label ?>
+                </a>
+            <?php endforeach; ?>
         </div>
+
     </div>
 
     <div class="legend" style="display:flex;gap:15px;margin:15px 0;">
