@@ -8,7 +8,7 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// 📌 Database connectie
+//  Database connectie
 try {
     $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -16,7 +16,7 @@ try {
     die("Fout!: " . $e->getMessage());
 }
 
-// 📅 Dag bepalen
+//  Dag bepalen
 $daysMap = [1=>'ma', 2=>'di', 3=>'wo', 4=>'do', 5=>'vr'];
 $todayNum = (int)date('N');
 $todayCol = $daysMap[$todayNum];
@@ -28,14 +28,14 @@ $dagDatum->modify($dagOffset.' days');
 $week = $dagDatum->format('W');
 $jaar = $dagDatum->format('o');
 
-// 🧼 Dubbele rijen voorkomen via unieke sleutel (moet al in DB staan)
+//  Dubbele rijen voorkomen via unieke sleutel (moet al in DB staan)
 $insertUpdate = $db->prepare("
     INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status, tijdelijk_tot)
     VALUES (:id, :week, :jaar, :dag, :status, :tijdelijk_tot)
     ON DUPLICATE KEY UPDATE status=VALUES(status), tijdelijk_tot=VALUES(tijdelijk_tot)
 ");
 
-// 🧑 Werknemers inplannen als ze er nog niet in staan
+//  Werknemers inplannen als ze er nog niet in staan
 $stmtWerknemers = $db->query("SELECT * FROM werknemers");
 $werknemers = $stmtWerknemers->fetchAll(PDO::FETCH_ASSOC);
 
@@ -56,7 +56,7 @@ foreach ($werknemers as $w) {
     }
 }
 
-// ⏰ Tijdelijk afwezig resetten als tijd voorbij is
+//  Tijdelijk afwezig resetten als tijd voorbij is
 $checkTijd = $db->prepare("SELECT id, tijdelijk_tot FROM week_planning WHERE weeknummer=:week AND jaar=:jaar AND dag=:dag AND status='Eefetjes Afwezig'");
 $checkTijd->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
 $now = time();
@@ -67,7 +67,7 @@ while ($row = $checkTijd->fetch(PDO::FETCH_ASSOC)) {
     }
 }
 
-// 📨 Status updaten
+// Status updaten
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
     $id = (int)$_POST['id'];
     $status = $_POST['status'];
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     exit;
 }
 
-// 🗑️ Bulk verwijderen
+// Bulk verwijderen
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete']) && !empty($_POST['selected_ids'])) {
     $ids = array_map('intval', $_POST['selected_ids']);
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete']) && !em
     exit;
 }
 
-// 👥 Data ophalen voor tabel
+//  Data ophalen voor tabel
 $stmt = $db->prepare("
     SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, w.BHV, wp.status, wp.tijdelijk_tot
     FROM werknemers w
@@ -132,7 +132,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-<!-- ✅ Originele header behouden, alleen login toegevoegd -->
+<!--  Originele header behouden, alleen login toegevoegd -->
 <header class="header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 20px;">
     <section class="logo-container">
         <a href="#" class="logo-link">
@@ -252,7 +252,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <a href="add.php"><button>➕ Voeg een medewerker toe</button></a>
 </main>
 
-<!-- 📌 Modal -->
+<!--  Modal -->
 <div id="detail-modal">
     <div id="modal-content"></div>
     <button id="close-modal">&times;</button>

@@ -60,9 +60,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], 
     exit;
 }
 
-// Werknemers ophalen
-$stmt = $db->query("SELECT * FROM werknemers ORDER BY achternaam ASC, voornaam ASC, BHV");
-$werknemers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Haal alleen werknemers op met een ingevulde voor- en achternaam
+try {
+    $stmtWerknemers = $db->query("
+        SELECT *
+        FROM werknemers
+        WHERE TRIM(COALESCE(voornaam, '')) <> ''
+          AND TRIM(COALESCE(achternaam, '')) <> ''
+        ORDER BY  voornaam ASC
+    ");
+    $werknemers = $stmtWerknemers->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die('Fout bij ophalen werknemers: ' . $e->getMessage());
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="nl">

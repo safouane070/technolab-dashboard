@@ -17,15 +17,28 @@ try {
     die("Databasefout: " . $e->getMessage());
 }
 
+$sectorenFile = __DIR__ . '/sectoren.json';
+
+// Als bestand niet bestaat, maak een lege lijst
+if (!file_exists($sectorenFile)) {
+    file_put_contents($sectorenFile, json_encode([]));
+}
+
+// Sectoren uit bestand lezen
+$extraSectoren = json_decode(file_get_contents($sectorenFile), true) ?: [];
+
 // Flash messages
 $melding = $_SESSION['flash_message'] ?? null;
 unset($_SESSION['flash_message']);
 
-// Sector verwijderen
+// Variabelen initialiseren
 $warningMessage = null;
 $sectorToDelete = null;
 $medewerkers = [];
 
+// =====================
+// 1️⃣ Sector verwijderen
+// =====================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && $isAdmin) {
 
     // CSRF check
@@ -37,26 +50,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && 
     $medewerkerSector = $_POST['medewerker_sector'] ?? [];
 
     if ($sectorToDelete) {
-        $stmtSelect = $db->prepare("SELECT id FROM werknemers WHERE sector = :sector");
-        $stmtSelect->execute([':sector' => $sectorToDelete]);
-        $medewerkersIds = $stmtSelect->fetchAll(PDO::FETCH_COLUMN);
 
-        foreach ($medewerkersIds as $i => $id) {
-            $nieuweSector = $medewerkerSector[$i] ?? null;
-            if ($nieuweSector && $nieuweSector !== '__leeg__') {
-                $updateStmt = $db->prepare("UPDATE werknemers SET sector = :nieuw WHERE id = :id");
-                $updateStmt->execute([':nieuw' => $nieuweSector, ':id' => $id]);
-            } else {
-                $updateStmt = $db->prepare("UPDATE werknemers SET sector = NULL WHERE id = :id");
-                $updateStmt->execute([':id' => $id]);
+        // ✅ Update medewerkers alleen als er medewerkers zijn
+        if (!empty($medewerkerSector)) {
+            $stmtSelect = $db->prepare("SELECT id FROM werknemers WHERE sector = :sector");
+            $stmtSelect->execute([':sector' => $sectorToDelete]);
+            $medewerkersIds = $stmtSelect->fetchAll(PDO::FETCH_COLUMN);
+
+            foreach ($medewerkersIds as $i => $id) {
+                $nieuweSector = $medewerkerSector[$i] ?? null;
+                if ($nieuweSector && $nieuweSector !== '__leeg__') {
+                    $updateStmt = $db->prepare("UPDATE werknemers SET sector = :nieuw WHERE id = :id");
+                    $updateStmt->execute([':nieuw' => $nieuweSector, ':id' => $id]);
+                } else {
+                    $updateStmt = $db->prepare("UPDATE werknemers SET sector = NULL WHERE id = :id");
+                    $updateStmt->execute([':id' => $id]);
+                }
             }
         }
 
+        // ✅ Verwijder sector uit JSON-bestand als aanwezig
+        if (($key = array_search($sectorToDelete, $extraSectoren)) !== false) {
+            unset($extraSectoren[$key]);
+            $extraSectoren = array_values($extraSectoren); // herindexeer array
+            file_put_contents($sectorenFile, json_encode($extraSectoren, JSON_PRETTY_PRINT));
+        }
+
+        // ✅ Feedback aan admin
         $warningMessage = "<div class='alert alert-success'>Sector <strong>" . htmlspecialchars($sectorToDelete) . "</strong> is verwijderd. Medewerkers zijn bijgewerkt.</div>";
         $sectorToDelete = null;
     }
+
 }
-// Nieuwe sector toevoegen (alleen admin)
+
+// =====================
+// 2️⃣ Nieuwe sector toevoegen
+// =====================
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sector_toevoegen'])) {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("Ongeldige actie (CSRF).");
@@ -64,37 +93,70 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sector_to
 
     $nieuweSector = trim($_POST['nieuwe_sector']);
     if ($nieuweSector !== '') {
-        // Check of de sector al bestaat
-        $check = $db->prepare("SELECT COUNT(*) FROM werknemers WHERE sector = :sector");
-        $check->execute([':sector' => $nieuweSector]);
-        if ($check->fetchColumn() == 0) {
-            // Voeg de sector toe door een lege entry te maken (zonder medewerker)
-            $insert = $db->prepare("INSERT INTO werknemers (sector) VALUES (:sector)");
-            $insert->execute([':sector' => $nieuweSector]);
+        // Check of sector al in DB of JSON-bestand bestaat
+        $checkDB = $db->prepare("SELECT COUNT(*) FROM werknemers WHERE sector = :sector");
+        $checkDB->execute([':sector' => $nieuweSector]);
+        $bestaatInDB = $checkDB->fetchColumn() > 0;
+        $bestaatInJSON = in_array($nieuweSector, $extraSectoren);
+
+        if (!$bestaatInDB && !$bestaatInJSON) {
+            $extraSectoren[] = $nieuweSector;
+            file_put_contents($sectorenFile, json_encode($extraSectoren, JSON_PRETTY_PRINT));
             $_SESSION['flash_message'] = "<div class='alert alert-success text-center'>Sector <strong>" . htmlspecialchars($nieuweSector) . "</strong> is toegevoegd.</div>";
         } else {
             $_SESSION['flash_message'] = "<div class='alert alert-warning text-center'>Sector <strong>" . htmlspecialchars($nieuweSector) . "</strong> bestaat al.</div>";
         }
+
         header("Location: add.php");
         exit;
     }
 }
 
+// =====================
+// 3️⃣ Admin vraagt sector verwijderen (GET)
+// =====================
 // Admin vraagt om sector verwijderen
 if ($isAdmin && isset($_GET['delete_sector'])) {
     $sectorToDelete = trim($_GET['delete_sector']);
+
     if ($sectorToDelete !== '') {
+        // Check of er medewerkers in deze sector zitten
         $stmt = $db->prepare("SELECT voornaam, tussenvoegsel, achternaam, email FROM werknemers WHERE sector = :sector");
         $stmt->execute([':sector' => $sectorToDelete]);
         $medewerkers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($medewerkers) > 0) {
+            // Toon popup om medewerkers te verplaatsen
+            // (de bestaande popup-code onderaan de HTML doet dit)
+        } else {
+            // ❌ Geen medewerkers — verwijder direct de sector
+            if (($key = array_search($sectorToDelete, $extraSectoren)) !== false) {
+                unset($extraSectoren[$key]);
+                $extraSectoren = array_values($extraSectoren);
+                file_put_contents($sectorenFile, json_encode($extraSectoren, JSON_PRETTY_PRINT));
+            }
+
+            $_SESSION['flash_message'] = "<div class='alert alert-success text-center'>Lege sector <strong>" . htmlspecialchars($sectorToDelete) . "</strong> is verwijderd.</div>";
+            header("Location: add.php");
+            exit;
+        }
     }
 }
 
-// Alle sectoren ophalen
-$sectorenStmt = $db->query("SELECT DISTINCT sector FROM werknemers WHERE sector IS NOT NULL AND sector <> '' ORDER BY sector ASC");
-$sectoren = $sectorenStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// Nieuwe medewerker toevoegen
+// =====================
+// 4️⃣ Sectoren ophalen en combineren
+// =====================
+$sectorenStmt = $db->query("SELECT DISTINCT sector FROM werknemers WHERE sector IS NOT NULL AND sector <> '' ORDER BY sector ASC");
+$dbSectoren = $sectorenStmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Combineer DB + JSON
+$sectoren = array_unique(array_merge($dbSectoren, $extraSectoren));
+sort($sectoren);
+
+// =====================
+// 5️⃣ Nieuwe medewerker toevoegen
+// =====================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete'])) {
 
     $voornaam = trim($_POST['voornaam'] ?? '');
