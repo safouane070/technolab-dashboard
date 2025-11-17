@@ -114,7 +114,7 @@ $stmt = $db->prepare("
         AND wp.jaar = :jaar
         AND wp.dag = :dag
     ORDER BY FIELD(wp.status,'Aanwezig','Eefetjes Afwezig','Ziek','Afwezig'),
-             w.achternaam, w.voornaam
+              w.voornaam
 ");
 $stmt->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
 $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
