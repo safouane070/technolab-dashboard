@@ -16,8 +16,10 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/nav.css"/>
+    <link rel="stylesheet" href="css/media.css">
 
-  <title>Absence Tracker</title>
+
+    <title>Absence Tracker</title>
 </head>
 <body>
   <main class="app">

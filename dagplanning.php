@@ -128,6 +128,8 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="css/dagplanning.css" rel="stylesheet"/>
     <link href="css/nav.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/media.css">
+
     <title>Dagplanning</title>
 </head>
 <style>

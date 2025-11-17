@@ -86,6 +86,8 @@ try {
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/week.css" />
     <link rel="stylesheet" href="css/nav.css" />
+    <link rel="stylesheet" href="css/week-media.css">
+
 </head>
 <body>
 <div class="app">
