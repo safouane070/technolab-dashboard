@@ -37,11 +37,9 @@ $sectorToDelete = null;
 $medewerkers = [];
 
 // =====================
-// Sector verwijderen
+// Sector verwijderen (POST)
 // =====================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && $isAdmin) {
-
-    // CSRF check
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("Ongeldige actie (CSRF).");
     }
@@ -50,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && 
     $medewerkerSector = $_POST['medewerker_sector'] ?? [];
 
     if ($sectorToDelete) {
-
         // Update medewerkers
         if (!empty($medewerkerSector)) {
             $stmtSelect = $db->prepare("SELECT id FROM werknemers WHERE sector = :sector");
@@ -152,7 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
     $achternaam = trim($_POST['achternaam'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $sector = !empty($_POST['sector_nieuw']) ? trim($_POST['sector_nieuw']) : ($_POST['sector'] ?? null);
-    // BHV: lees checkbox met naam "BHV" (consistent met update-pagina)
     $bhv = isset($_POST['BHV']) ? 1 : 0;
 
     // Werkdagen
@@ -170,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
     if ($bestaat > 0) {
         $melding = '<div class="alert alert-danger">Dit e-mailadres bestaat al.</div>';
     } else {
-        $stmt = $db->prepare("INSERT INTO werknemers 
+        $stmt = $db->prepare("INSERT INTO werknemers
             (voornaam, tussenvoegsel, achternaam, email, werkdag_ma, werkdag_di, werkdag_wo, werkdag_do, werkdag_vr, sector, BHV, status)
             VALUES (:voornaam, :tussenvoegsel, :achternaam, :email, :ma, :di, :wo, :do, :vr, :sector, :bhv, :status)");
         $stmt->execute([
@@ -198,10 +194,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<title>Nieuwe medewerker toevoegen</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="css/add.css">
+    <meta charset="UTF-8">
+    <title>Nieuwe medewerker toevoegen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/add.css">
+    <style>
+        /* Voeg hier je CSS voor popup en sectorbeheer toe, bijvoorbeeld overlay en .popup-card */
+    </style>
 </head>
 <body>
 
@@ -261,30 +260,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
             <h5 class="mb-2">Werkdagen</h5>
 
             <div class="days-grid mb-2">
-                <div class="form-check">
-                    <input type="checkbox" name="werkdag_ma" class="form-check-input" id="werkdag_ma">
-                    <label class="form-check-label" for="werkdag_ma">Maandag</label>
-                </div>
-
-                <div class="form-check">
-                    <input type="checkbox" name="werkdag_di" class="form-check-input" id="werkdag_di">
-                    <label class="form-check-label" for="werkdag_di">Dinsdag</label>
-                </div>
-
-                <div class="form-check">
-                    <input type="checkbox" name="werkdag_wo" class="form-check-input" id="werkdag_wo">
-                    <label class="form-check-label" for="werkdag_wo">Woensdag</label>
-                </div>
-
-                <div class="form-check">
-                    <input type="checkbox" name="werkdag_do" class="form-check-input" id="werkdag_do">
-                    <label class="form-check-label" for="werkdag_do">Donderdag</label>
-                </div>
-
-                <div class="form-check">
-                    <input type="checkbox" name="werkdag_vr" class="form-check-input" id="werkdag_vr">
-                    <label class="form-check-label" for="werkdag_vr">Vrijdag</label>
-                </div>
+                <?php
+                $dagen = ['ma'=>'Maandag','di'=>'Dinsdag','wo'=>'Woensdag','do'=>'Donderdag','vr'=>'Vrijdag'];
+                foreach($dagen as $key=>$label):
+                    ?>
+                    <div class="form-check">
+                        <input type="checkbox" name="werkdag_<?= $key ?>" class="form-check-input" id="werkdag_<?= $key ?>">
+                        <label class="form-check-label" for="werkdag_<?= $key ?>"><?= $label ?></label>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -296,9 +280,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
     </form>
 </div>
 
+<!-- Admin sector beheer -->
+<?php if($isAdmin): ?>
+    <div class="form-section mt-3 add-card">
+        <h5 class="mb-2">Sectoren beheren</h5>
+
+        <form method="post" class="d-flex gap-2 mb-3">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+            <input type="text" name="nieuwe_sector" class="form-control" placeholder="Nieuwe sector toevoegen..." required>
+            <button type="submit" name="sector_toevoegen" class="btn btn-success">+</button>
+        </form>
+
+        <div class="sector-list">
+            <?php foreach ($sectoren as $s): ?>
+                <div class="sector-item d-flex justify-content-between align-items-center mb-2">
+                    <span><?= htmlspecialchars($s, ENT_QUOTES|ENT_SUBSTITUTE) ?></span>
+                    <a href="?delete_sector=<?= urlencode($s) ?>" class="btn btn-sm btn-outline-danger">X</a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<!-- Overlay popup voor verwijderen sector -->
+<?php if($sectorToDelete && count($medewerkers) > 0): ?>
+    <div class="overlay">
+        <div class="popup-card">
+            <div class="popup-header">
+                Sector verwijderen: <?= htmlspecialchars($sectorToDelete) ?>
+                <button type="button" class="close-btn" onclick="document.querySelector('.overlay').style.display='none'">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p>Deze sector heeft <strong><?= count($medewerkers) ?></strong> medewerker(s). Kies per medewerker een nieuwe sector:</p>
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <input type="hidden" name="sector_to_delete" value="<?= htmlspecialchars($sectorToDelete) ?>">
+
+                    <div class="medewerker-lijst">
+                        <?php foreach($medewerkers as $i=>$m): ?>
+                            <div class="form-section medewerker-item">
+                                <strong><?= htmlspecialchars($m['voornaam'].' '.$m['tussenvoegsel'].' '.$m['achternaam'].' ('.$m['email'].')') ?></strong>
+                                <select name="medewerker_sector[<?= $i ?>]">
+                                    <option value="__leeg__">(Geen, laat leeg)</option>
+                                    <?php foreach($sectoren as $s): if($s !== $sectorToDelete): ?>
+                                        <option value="<?= htmlspecialchars($s, ENT_QUOTES|ENT_SUBSTITUTE) ?>"><?= htmlspecialchars($s) ?></option>
+                                    <?php endif; endforeach; ?>
+                                </select>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+            </div>
+
+            <div class="popup-footer">
+                <a href="add.php" class="btn btn-outline-secondary">Annuleren</a>
+                <button type="submit" name="confirm_delete" class="btn btn-danger">Verwijderen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
 <script>
-    // Toggle nieuwe sector input
     (function(){
         const select = document.getElementById('sectorSelect');
         const nieuwInput = document.getElementById('sectorNieuw');
@@ -312,7 +355,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
                     nieuwInput.value='';
                 }
             }
-            // initial check
             toggleNieuw();
             select.addEventListener('change', toggleNieuw);
         }
