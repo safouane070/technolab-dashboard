@@ -21,7 +21,7 @@ if (!$werknemer) {
     die("Werknemer niet gevonden.");
 }
 
-// 📅 Bepaal huidige dag
+// Bepaal huidige dag
 $dagenMap = [
     1 => 'ma',
     2 => 'di',
@@ -33,7 +33,7 @@ $dagenMap = [
 $dagNummer = (int) date('N'); // 1 (maandag) - 7 (zondag)
 $huidigeDag = $dagenMap[$dagNummer] ?? null;
 
-// ✅ Alleen updaten als het een werkdag is (ma-vr)
+//  Alleen updaten als het een werkdag is (ma-vr)
 if ($huidigeDag) {
     $col = 'werkdag_' . $huidigeDag;
 

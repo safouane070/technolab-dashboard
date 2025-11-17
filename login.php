@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
 
                 <?php if ($error): ?>
-                    <p class="text-red-500 text-sm sm:text-base text-center"><?php echo htmlspecialchars($error); ?></p>
+                    <p class="text-red-500 text-sm sm:text-base text-center"><?php echo ($error); ?></p>
                 <?php endif; ?>
 
                 <button

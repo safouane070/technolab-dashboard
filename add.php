@@ -37,7 +37,7 @@ $sectorToDelete = null;
 $medewerkers = [];
 
 // =====================
-// 1️⃣ Sector verwijderen
+// Sector verwijderen
 // =====================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && $isAdmin) {
 
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && 
 
     if ($sectorToDelete) {
 
-        // ✅ Update medewerkers alleen als er medewerkers zijn
+        // Update medewerkers alleen als er medewerkers zijn
         if (!empty($medewerkerSector)) {
             $stmtSelect = $db->prepare("SELECT id FROM werknemers WHERE sector = :sector");
             $stmtSelect->execute([':sector' => $sectorToDelete]);
@@ -69,14 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && 
             }
         }
 
-        // ✅ Verwijder sector uit JSON-bestand als aanwezig
+        //  Verwijder sector uit JSON-bestand als aanwezig
         if (($key = array_search($sectorToDelete, $extraSectoren)) !== false) {
             unset($extraSectoren[$key]);
             $extraSectoren = array_values($extraSectoren); // herindexeer array
             file_put_contents($sectorenFile, json_encode($extraSectoren, JSON_PRETTY_PRINT));
         }
 
-        // ✅ Feedback aan admin
+        // Feedback aan admin
         $warningMessage = "<div class='alert alert-success'>Sector <strong>" . htmlspecialchars($sectorToDelete) . "</strong> is verwijderd. Medewerkers zijn bijgewerkt.</div>";
         $sectorToDelete = null;
     }
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete']) && 
 }
 
 // =====================
-// 2️⃣ Nieuwe sector toevoegen
+//  Nieuwe sector toevoegen
 // =====================
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sector_toevoegen'])) {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -113,7 +113,7 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sector_to
 }
 
 // =====================
-// 3️⃣ Admin vraagt sector verwijderen (GET)
+// Admin vraagt sector verwijderen (GET)
 // =====================
 // Admin vraagt om sector verwijderen
 if ($isAdmin && isset($_GET['delete_sector'])) {
@@ -129,7 +129,7 @@ if ($isAdmin && isset($_GET['delete_sector'])) {
             // Toon popup om medewerkers te verplaatsen
             // (de bestaande popup-code onderaan de HTML doet dit)
         } else {
-            // ❌ Geen medewerkers — verwijder direct de sector
+            //  Geen medewerkers — verwijder direct de sector
             if (($key = array_search($sectorToDelete, $extraSectoren)) !== false) {
                 unset($extraSectoren[$key]);
                 $extraSectoren = array_values($extraSectoren);

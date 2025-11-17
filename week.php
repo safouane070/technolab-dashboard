@@ -27,7 +27,7 @@ $weekDays = [
     'Vr' => ['col' => 'vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
 ];
 
-// ✅ Opslaan van status (zonder week te verliezen!)
+// Opslaan van status (zonder week te verliezen!)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
     $id = intval($_POST['id']);
     $dag = $_POST['dag']; // ma, di, wo, do, vr
