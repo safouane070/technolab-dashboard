@@ -13,7 +13,8 @@ if (!isset($_GET['id'])) {
 
 $id = (int) $_GET['id'];
 
-$stmt = $db->prepare("SELECT * FROM werknemers WHERE id = :id");
+// Haal werknemer op uit de nieuwe employee tabel
+$stmt = $db->prepare("SELECT * FROM employee WHERE id = :id");
 $stmt->execute([':id' => $id]);
 $werknemer = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -29,27 +30,22 @@ $dagenMap = [
     4 => 'do',
     5 => 'vr'
 ];
-
 $dagNummer = (int) date('N'); // 1 (maandag) - 7 (zondag)
 $huidigeDag = $dagenMap[$dagNummer] ?? null;
 
-//  Alleen updaten als het een werkdag is (ma-vr)
+// Alleen updaten als het een werkdag is (ma-vr)
 if ($huidigeDag) {
-    $col = 'werkdag_' . $huidigeDag;
-
-    // Status bepalen op basis van werkdag, behalve bij Ziek of Eefetjes Afwezig
+    $col = 'workday_' . $huidigeDag;
     if (!in_array($werknemer['status'], ['Ziek', 'Eefetjes Afwezig'])) {
-        $status = $werknemer[$col] ? 'Aanwezig' : 'Afwezig';
+        $status = isset($werknemer[$col]) && $werknemer[$col] ? 'Aanwezig' : 'Afwezig';
         $werknemer['status'] = $status;
     }
 }
 
-$volledigeNaam = $werknemer['voornaam'];
-if (!empty($werknemer['tussenvoegsel'])) {
-    $volledigeNaam .= ' ' . $werknemer['tussenvoegsel'];
-}
-$volledigeNaam .= ' ' . $werknemer['achternaam'];
+// Volledige naam samenstellen
+$volledigeNaam = $werknemer['name'] ?? 'Onbekend';
 
+// Nederlandse dagen
 $dagen = [
     'ma' => 'Maandag',
     'di' => 'Dinsdag',
@@ -62,7 +58,7 @@ $dagen = [
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Details van <?= ($volledigeNaam) ?></title>
+    <title>Details van <?= htmlspecialchars($volledigeNaam) ?></title>
     <link rel="stylesheet" href="css/details.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -75,9 +71,9 @@ $dagen = [
 </head>
 <body>
 <div class="card">
-    <h2><?= ($volledigeNaam) ?></h2>
+    <h2><?= htmlspecialchars($volledigeNaam) ?></h2>
 
-    <p><i class="bi bi-envelope"></i> <strong>Email:</strong> <?= ($werknemer['email']) ?></p>
+    <p><i class="bi bi-envelope"></i> <strong>Email:</strong> <?= htmlspecialchars($werknemer['email'] ?? '-') ?></p>
 
     <p>
         <i class="bi bi-activity"></i> <strong>Status:</strong>
@@ -86,27 +82,27 @@ $dagen = [
                 <?= $werknemer['status'] === 'Afwezig' ? 'status-afwezig' : '' ?>
                 <?= $werknemer['status'] === 'Ziek' ? 'status-ziek' : '' ?>
                 <?= $werknemer['status'] === 'Eefetjes Afwezig' ? 'status-eefetjes' : '' ?>
-            "><?= ($werknemer['status']) ?></span>
+            "><?= htmlspecialchars($werknemer['status'] ?? '-') ?></span>
     </p>
 
-    <p><i class="bi bi-diagram-3"></i> <strong>Sector:</strong> <?= ($werknemer['sector']) ?></p>
+    <p><i class="bi bi-diagram-3"></i> <strong>Sector:</strong> <?= htmlspecialchars($werknemer['sector'] ?? '-') ?></p>
 
     <p>
         <i class="bi bi-shield-check"></i> <strong>BHV:</strong>
-        <span class="bhv <?= $werknemer['BHV'] ? 'bhv-ja' : 'bhv-nee' ?>">
-                <?= $werknemer['BHV'] ? 'Ja' : 'Nee' ?>
-            </span>
+        <span class="bhv <?= !empty($werknemer['BHV']) ? 'bhv-ja' : 'bhv-nee' ?>">
+                <?= !empty($werknemer['BHV']) ? 'Ja' : 'Nee' ?>
+        </span>
     </p>
 
     <p><i class="bi bi-calendar-week"></i> <strong>Werkdagen:</strong></p>
     <div class="werkdagen">
         <?php foreach ($dagen as $afkorting => $naam):
-            $isWerkdag = $werknemer['werkdag_' . $afkorting];
+            $isWerkdag = !empty($werknemer['workday_'.$afkorting]);
             $todayClass = ($huidigeDag === $afkorting) ? 'today' : '';
             ?>
             <span class="werkdag <?= $isWerkdag ? 'active' : 'inactive' ?> <?= $todayClass ?>">
-                    <?= ($naam) ?>
-                </span>
+                <?= $naam ?>
+            </span>
         <?php endforeach; ?>
     </div>
 

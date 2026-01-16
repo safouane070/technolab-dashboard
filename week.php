@@ -18,7 +18,7 @@ if ($weekOffset !== 0) {
 $jaar = $startOfWeek->format("o");
 $weeknummer = $startOfWeek->format("W");
 
-//  Weekdagen definities
+// Weekdagen definities
 $weekDays = [
     'Ma' => ['col' => 'ma', 'date' => (clone $startOfWeek)],
     'Di' => ['col' => 'di', 'date' => (clone $startOfWeek)->modify('+1 day')],
@@ -27,52 +27,35 @@ $weekDays = [
     'Vr' => ['col' => 'vr', 'date' => (clone $startOfWeek)->modify('+4 day')],
 ];
 
-// Opslaan van status (zonder week te verliezen!)
+// Opslaan van status
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['dag'], $_POST['status'])) {
     $id = intval($_POST['id']);
-    $dag = $_POST['dag']; // ma, di, wo, do, vr
+    $dag = $_POST['dag'];
     $status = $_POST['status'];
+    $tijdelijk_tot = $_POST['status'] === 'Eefetjes Afwezig' && !empty($_POST['tijdelijk_tot']) ? $_POST['tijdelijk_tot'] : null;
 
-    // Sla status op in juiste week + jaar
     $stmt = $db->prepare("
-        INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status)
-        VALUES (:id, :week, :jaar, :dag, :status)
-        ON DUPLICATE KEY UPDATE status = VALUES(status)
+        INSERT INTO week_planning (employee_id, weeknummer, jaar, dag, status, tijdelijk_tot)
+        VALUES (:id, :week, :jaar, :dag, :status, :tijdelijk_tot)
+        ON DUPLICATE KEY UPDATE status = VALUES(status), tijdelijk_tot = VALUES(tijdelijk_tot)
     ");
     $stmt->execute([
         ':id' => $id,
         ':week' => $weeknummer,
         ':jaar' => $jaar,
         ':dag' => $dag,
-        ':status' => $status
+        ':status' => $status,
+        ':tijdelijk_tot' => $tijdelijk_tot
     ]);
-
-    // Als de dag van vandaag wordt aangepast → sync naar werknemers-tabel
-    $today = date('N');
-    $daysMap = [1=>'ma',2=>'di',3=>'wo',4=>'do',5=>'vr'];
-    if (isset($daysMap[$today]) && $daysMap[$today] === $dag && $weeknummer == date('W') && $jaar == date('o')) {
-        $stmt = $db->prepare("UPDATE werknemers SET status = :status WHERE id = :id");
-        $stmt->execute([':status'=>$status, ':id'=>$id]);
-    }
 
     // Blijf op dezelfde week na opslaan
     header("Location: " . $_SERVER['PHP_SELF'] . "?week=$weekOffset");
     exit;
 }
 
-// Haal alleen werknemers op met een ingevulde voor- en achternaam
-try {
-    $stmtWerknemers = $db->query("
-        SELECT *
-        FROM werknemers
-        WHERE TRIM(COALESCE(voornaam, '')) <> ''
-          AND TRIM(COALESCE(achternaam, '')) <> ''
-        ORDER BY  voornaam ASC
-    ");
-    $werknemers = $stmtWerknemers->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die('Fout bij ophalen werknemers: ' . $e->getMessage());
-}
+// Werknemers ophalen
+$stmtWerknemers = $db->query("SELECT * FROM employee ORDER BY name ASC, middle_name ASC, last_name ASC");
+$werknemers = $stmtWerknemers->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -165,23 +148,23 @@ try {
                 <tbody>
                 <?php foreach ($werknemers as $w): ?>
                     <?php
-                    $stmt = $db->prepare("SELECT dag, status FROM week_planning WHERE werknemer_id = :id AND weeknummer = :week AND jaar = :jaar");
+                    $stmt = $db->prepare("SELECT dag, status FROM week_planning WHERE employee_id = :id AND weeknummer = :week AND jaar = :jaar");
                     $stmt->execute([':id'=>$w['id'], ':week'=>$weeknummer, ':jaar'=>$jaar]);
                     $weekStatussen = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
                     ?>
                     <tr>
                         <td class="werknemer-naam">
-                            <?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
-                            <span class="bhv <?= $w['BHV'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
-                                <?= $w['BHV'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
+
+                            <?= ($w['name'].' '.($w['middle_name']?$w['middle_name'].' ':'').$w['last_name']) ?>
+                            <span class="bhv <?= $w['bhv'] ? 'bhv-BHV' : 'bhv-BHV' ?>">
+                                <?= $w['bhv'] ? '  <img src="image/BHV.png" alt="Technolab Logo" class="logo-icon">' : '' ?>
                             </span>
                         </td>
-                        <?php foreach ($weekDays as $dayName => $info): ?>
-
-                            <?php
-
+                        <?php foreach ($weekDays as $dayName => $info):
                             $col = $info['col'];
-                            $status = $weekStatussen[$col] ?? ($w['werkdag_'.$col] ? 'Aanwezig' : 'Afwezig');
+                            $status = $weekStatussen[$col] ?? (
+                            isset($w['workday_'.$col]) && $w['workday_'.$col] ? 'Aanwezig' : 'Afwezig'
+                            );
                             $class = 'status-'.strtolower(str_replace(' ', '', $status));
                             ?>
                             <td>

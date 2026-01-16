@@ -1,73 +1,116 @@
 <?php
 session_start();
+
+/* ================= LOGOUT ================= */
 if (isset($_GET['logout'])) {
     $_SESSION = [];
     session_destroy();
-    // Blijf op dezelfde pagina, maar zonder ?logout=1 in de URL
     header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
     exit;
 }
 
-//  Database connectie
+/* ================= DATABASE ================= */
 try {
-    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = new PDO(
+        "mysql:host=localhost;dbname=technolab-dashboard;charset=utf8mb4",
+        "root",
+        "",
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
 } catch (PDOException $e) {
-    die("Fout!: " . $e->getMessage());
+    die("Database fout: " . $e->getMessage());
 }
 
-//  Dag bepalen
+/* ================= DAG / WEEK ================= */
 $daysMap = [1=>'ma', 2=>'di', 3=>'wo', 4=>'do', 5=>'vr'];
 $todayNum = (int)date('N');
-$todayCol = $daysMap[$todayNum];
-$dag = isset($_GET['dag']) && in_array($_GET['dag'], $daysMap) ? $_GET['dag'] : $todayCol;
+$todayDag = $daysMap[$todayNum] ?? 'ma';
+
+$dag = (isset($_GET['dag']) && in_array($_GET['dag'], $daysMap))
+    ? $_GET['dag']
+    : $todayDag;
 
 $dagDatum = new DateTime();
-$dagOffset = array_search($dag, $daysMap) - $todayNum;
-$dagDatum->modify($dagOffset.' days');
-$week = $dagDatum->format('W');
-$jaar = $dagDatum->format('o');
+$offset = array_search($dag, $daysMap) + 1 - $todayNum;
+$dagDatum->modify($offset . ' days');
 
-//  Dubbele rijen voorkomen via unieke sleutel (moet al in DB staan)
+$week = (int)$dagDatum->format('W');
+$jaar = (int)$dagDatum->format('o');
+
+/* ================= INSERT / UPDATE ================= */
 $insertUpdate = $db->prepare("
-    INSERT INTO week_planning (werknemer_id, weeknummer, jaar, dag, status, tijdelijk_tot)
-    VALUES (:id, :week, :jaar, :dag, :status, :tijdelijk_tot)
-    ON DUPLICATE KEY UPDATE status=VALUES(status), tijdelijk_tot=VALUES(tijdelijk_tot)
+    INSERT INTO week_planning 
+        (employee_id, weeknummer, jaar, dag, status, tijdelijk_tot)
+    VALUES 
+        (:id, :week, :jaar, :dag, :status, :tijdelijk_tot)
+    ON DUPLICATE KEY UPDATE 
+        status = VALUES(status),
+        tijdelijk_tot = VALUES(tijdelijk_tot)
 ");
 
-//  Werknemers inplannen als ze er nog niet in staan
-$stmtWerknemers = $db->query("SELECT * FROM werknemers");
-$werknemers = $stmtWerknemers->fetchAll(PDO::FETCH_ASSOC);
+/* ================= EMPLOYEES INPLANNEN ================= */
+$employees = $db->query("SELECT * FROM employee")->fetchAll(PDO::FETCH_ASSOC);
 
-foreach ($werknemers as $w) {
-    $check = $db->prepare("SELECT id FROM week_planning WHERE werknemer_id=:id AND weeknummer=:week AND jaar=:jaar AND dag=:dag");
-    $check->execute([':id'=>$w['id'], ':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+foreach ($employees as $e) {
+    $check = $db->prepare("
+        SELECT id FROM week_planning
+        WHERE employee_id = :id
+          AND weeknummer = :week
+          AND jaar = :jaar
+          AND dag = :dag
+    ");
+    $check->execute([
+        ':id' => $e['id'],
+        ':week' => $week,
+        ':jaar' => $jaar,
+        ':dag' => $dag
+    ]);
+
     if (!$check->fetch()) {
-        $werkdagKolom = 'werkdag_'.$dag;
-        $status = ($w[$werkdagKolom] == 1) ? 'Aanwezig' : 'Afwezig';
+        $werkdagKolom = 'workday_'.$dag;
+        $status = (!empty($e[$werkdagKolom]) && $e[$werkdagKolom] == 1)
+            ? 'Aanwezig'
+            : 'Afwezig';
+
         $insertUpdate->execute([
-            ':id'=>$w['id'],
-            ':week'=>$week,
-            ':jaar'=>$jaar,
-            ':dag'=>$dag,
-            ':status'=>$status,
-            ':tijdelijk_tot'=>null
+            ':id' => $e['id'],
+            ':week' => $week,
+            ':jaar' => $jaar,
+            ':dag' => $dag,
+            ':status' => $status,
+            ':tijdelijk_tot' => null
         ]);
     }
 }
 
-//  Tijdelijk afwezig resetten als tijd voorbij is
-$checkTijd = $db->prepare("SELECT id, tijdelijk_tot FROM week_planning WHERE weeknummer=:week AND jaar=:jaar AND dag=:dag AND status='Eefetjes Afwezig'");
-$checkTijd->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
-$now = time();
-$reset = $db->prepare("UPDATE week_planning SET status='Aanwezig', tijdelijk_tot=NULL WHERE id=:id");
-while ($row = $checkTijd->fetch(PDO::FETCH_ASSOC)) {
-    if ($row['tijdelijk_tot'] && strtotime($row['tijdelijk_tot']) <= $now) {
-        $reset->execute([':id'=>$row['id']]);
+/* ================= TIJDELIJK AFWEZIG RESET ================= */
+$checkTijd = $db->prepare("
+    SELECT id, tijdelijk_tot
+    FROM week_planning
+    WHERE weeknummer = :week
+      AND jaar = :jaar
+      AND dag = :dag
+      AND status = 'Eefetjes Afwezig'
+");
+$checkTijd->execute([
+    ':week' => $week,
+    ':jaar' => $jaar,
+    ':dag' => $dag
+]);
+
+$reset = $db->prepare("
+    UPDATE week_planning
+    SET status='Aanwezig', tijdelijk_tot=NULL
+    WHERE id=:id
+");
+
+while ($r = $checkTijd->fetch(PDO::FETCH_ASSOC)) {
+    if ($r['tijdelijk_tot'] && strtotime($r['tijdelijk_tot']) <= time()) {
+        $reset->execute([':id' => $r['id']]);
     }
 }
 
-// Status updaten
+/* ================= STATUS UPDATE ================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'])) {
     $id = (int)$_POST['id'];
     $status = $_POST['status'];
@@ -78,47 +121,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['status'
     }
 
     $insertUpdate->execute([
-        ':id'=>$id,
-        ':week'=>$week,
-        ':jaar'=>$jaar,
-        ':dag'=>$dag,
-        ':status'=>$status,
-        ':tijdelijk_tot'=>$tijdelijk_tot
+        ':id' => $id,
+        ':week' => $week,
+        ':jaar' => $jaar,
+        ':dag' => $dag,
+        ':status' => $status,
+        ':tijdelijk_tot' => $tijdelijk_tot
     ]);
 
-    // Ook hoofdstatus bijwerken in werknemers voor overzicht
-    $db->prepare("UPDATE werknemers SET status=:status WHERE id=:id")
+    $db->prepare("UPDATE employee SET status=:status WHERE id=:id")
         ->execute([':status'=>$status, ':id'=>$id]);
 
     header("Location: ".$_SERVER['PHP_SELF']."?dag=".$dag);
     exit;
 }
 
-// Bulk verwijderen
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete']) && !empty($_POST['selected_ids'])) {
-    $ids = array_map('intval', $_POST['selected_ids']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = $db->prepare("DELETE FROM werknemers WHERE id IN ($placeholders)");
-    $stmt->execute($ids);
-    header("Location: ".$_SERVER['PHP_SELF']."?dag=".$dag);
-    exit;
-}
-
-//  Data ophalen voor tabel
+/* ================= DATA OPHALEN ================= */
 $stmt = $db->prepare("
-    SELECT w.id, w.voornaam, w.tussenvoegsel, w.achternaam, w.BHV, wp.status, wp.tijdelijk_tot
-    FROM werknemers w
-    LEFT JOIN week_planning wp 
-        ON w.id = wp.werknemer_id
+    SELECT 
+        e.id,
+        e.name,
+        e.middle_name,
+        e.last_name,
+        e.bhv,
+        wp.status,
+        wp.tijdelijk_tot
+    FROM employee e
+    LEFT JOIN week_planning wp
+        ON e.id = wp.employee_id
         AND wp.weeknummer = :week
         AND wp.jaar = :jaar
         AND wp.dag = :dag
-    ORDER BY FIELD(wp.status,'Aanwezig','Eefetjes Afwezig','Ziek','Afwezig'),
-              w.voornaam
+    ORDER BY 
+        FIELD(wp.status,'Aanwezig','Eefetjes Afwezig','Ziek','Afwezig'),
+        e.name
 ");
-$stmt->execute([':week'=>$week, ':jaar'=>$jaar, ':dag'=>$dag]);
+
+$stmt->execute([
+    ':week' => $week,
+    ':jaar' => $jaar,
+    ':dag' => $dag
+]);
+
 $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -263,8 +310,8 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             };
             ?>
             <tr class="<?= $statusClass ?>">
-                <td><?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
-                    <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
+                <td><?= ($w['name'].' '.($w['middle_name']?$w['middle_name'].' ':'').$w['last_name']) ?>
+                    <?= $w['bhv'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                 </td>
                 <td>
                     <form method="post">
@@ -284,6 +331,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                value="<?= $w['tijdelijk_tot'] ? date('H:i', strtotime($w['tijdelijk_tot'])) : '' ?>"
                                style="display:<?= $status=='Eefetjes Afwezig' ? 'inline-block' : 'none' ?>"
                                onchange="this.form.submit();">
+
                     </form>
                 </td>
                 <td><a href="#" class="btn btn-sm btn-outline-primary btn-details" data-id="<?= $w['id'] ?>"><i class="bi bi-pc-display-horizontal"></i></a></td>
