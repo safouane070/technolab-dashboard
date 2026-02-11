@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
         ]);
 
         $_SESSION['flash_message'] = "<div class='alert alert-success'>Medewerker $voornaam $achternaam is succesvol toegevoegd.</div>";
-        header("Location: dagplanning.php");
+        header("Location: index.php");
         exit;
     }
 }
@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
 
         <!-- Buttons -->
         <div class="form-section d-flex justify-content-between">
-            <a href="dagplanning.php" class="btn btn-outline-secondary">Terug</a>
+            <a href="index.php" class="btn btn-outline-secondary">Terug</a>
             <button type="submit" class="btn btn-success">Opslaan</button>
         </div>
     </form>

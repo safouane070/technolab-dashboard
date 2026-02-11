@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($exists > 0) {
         $_SESSION['admin_logged_in'] = true;
-        header("Location: dagplanning.php");
+        header("Location: index.php");
         exit;
     } else {
         $error = "Ongeldig wachtwoord.";
