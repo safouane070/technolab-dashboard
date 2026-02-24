@@ -33,7 +33,7 @@ $fikaEmployeeIds = [];
 $fikaNames = [];
 $fikaReminderText = null;
 $showFikaReminder = false;
-
+ 
 try {
     // Bepaal de woensdag van dezelfde ISO-week als de gekozen dag
     $fikaDate = new DateTime();
@@ -258,8 +258,11 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="fika-reminder-wrap">
                 <a class="fika-logbook-link" href="../fika/html/fikalogboek.php">Ga direct naar het Fika Logboek</a>
                 <div class="fika-reminder" role="status" aria-live="polite">
-                    <div class="fika-reminder-title">Fika reminder</div>
-                    <div class="fika-reminder-text"><?= htmlspecialchars($fikaReminderText, ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="fika-reminder-emoji" aria-hidden="true">😋🍰</div>
+                    <div class="fika-reminder-content">
+                        <div class="fika-reminder-title">Fika reminder</div>
+                        <div class="fika-reminder-text"><?= htmlspecialchars($fikaReminderText, ENT_QUOTES, 'UTF-8') ?></div>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
@@ -352,7 +355,7 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td>
                         <?= ($w['voornaam'].' '.($w['tussenvoegsel']?$w['tussenvoegsel'].' ':'').$w['achternaam']) ?>
                         <?php if (!empty($fikaEmployeeIds) && in_array((int)$w['id'], $fikaEmployeeIds, true)): ?>
-                            <img src="image/fika.svg" alt="Fika" class="fika-icon">
+                            <img src="image/fika-alfabet.svg" alt="Fika" class="fika-icon">
                         <?php endif; ?>
                         <?= $w['BHV'] ? '<img src="image/BHV.png" alt="BHV" class="logo-icon">' : '' ?>
                     </td>

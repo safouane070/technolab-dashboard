@@ -107,57 +107,176 @@ body {
   margin-bottom: 2rem;
 }
 
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .page-header h4 {
+    margin-bottom: 0;
+  }
+}
+
 .fika-reminder-wrap{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  gap:10px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  margin: 0 auto 1rem;
+  padding: 0.75rem 0;
 }
 
 .fika-logbook-link{
-  display:inline-block;
-  font-weight:700;
+  display: inline-block;
+  font-weight: 700;
   font-size: 0.95rem;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 9999px;
-  background: #111827;
+  background: linear-gradient(135deg, #6366f1, #22c55e);
   color: #fff;
-  text-decoration:none;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .fika-logbook-link:hover{
-  background:#1f2937;
-  color:#fff;
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.28);
+  color: #fff;
 }
 
 .fika-reminder{
-  width: min(520px, 90vw);
-  border: 2px solid #f59e0b;
-  background: #fffbeb;
-  color: #92400e;
-  border-radius: 14px;
-  padding: 14px 18px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+  position: relative;
+  width: min(520px, 100%);
+  border-radius: 18px;
+  padding: 16px 18px 18px;
+  background: radial-gradient(circle at top left, rgba(96, 165, 250, 0.35), transparent 55%),
+              radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.35), transparent 55%),
+              #0f172a;
+  color: #e5e7eb;
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.70);
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  animation: fikaGlow 3.4s ease-in-out infinite;
+}
+
+.fika-reminder::before{
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(circle at top, rgba(248, 250, 252, 0.08), transparent 65%);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .fika-reminder-title{
+  position: relative;
+  z-index: 1;
   font-weight: 800;
-  font-size: 1.05rem;
-  margin-bottom: 6px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #a5b4fc;
+  margin-bottom: 2px;
 }
 
 .fika-reminder-text{
+  position: relative;
+  z-index: 1;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  color: #f9fafb;
+  text-align: left;
+}
+
+.fika-reminder-content{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fika-reminder-emoji{
+  position: relative;
+  z-index: 1;
+  font-size: 2.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 6px 10px rgba(15, 23, 42, 0.6));
+  animation: fikaBite 1.6s ease-in-out infinite;
+}
+
+@keyframes fikaGlow {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 22px 45px rgba(15, 23, 42, 0.70);
+  }
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 26px 55px rgba(15, 23, 42, 0.80);
+  }
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 22px 45px rgba(15, 23, 42, 0.70);
+  }
+}
+
+@keyframes fikaBite {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  40% {
+    transform: translateY(-2px) rotate(-4deg) scale(1.06);
+  }
+  60% {
+    transform: translateY(0) rotate(2deg) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fika-reminder{
+    animation: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .fika-reminder-wrap{
+    gap: 10px;
+    padding: 0.5rem 0;
+  }
+
+  .fika-reminder{
+    padding: 14px 14px 16px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .fika-reminder-text{
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .fika-reminder{
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fika-reminder-emoji{
+    font-size: 2.1rem;
+  }
 }
 
 .fika-icon{
-  width: 18px;
-  height: 18px;
-  margin-left: 8px;
+  width: 55px;
+  height: 25px;
+  margin-left:  2px;
   vertical-align: middle;
 }
 
