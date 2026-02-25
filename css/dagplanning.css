@@ -136,8 +136,8 @@ body {
   font-size: 0.95rem;
   padding: 8px 16px;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #6366f1, #22c55e);
-  color: #fff;
+  background: linear-gradient(135deg, #4df327, #4df327);
+  color: #290047;
   text-decoration: none;
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
@@ -147,7 +147,7 @@ body {
   filter: brightness(1.05);
   transform: translateY(-1px);
   box-shadow: 0 16px 35px rgba(15, 23, 42, 0.28);
-  color: #fff;
+  color: #290047;
 }
 
 .fika-reminder{
@@ -155,18 +155,17 @@ body {
   width: min(520px, 100%);
   border-radius: 18px;
   padding: 16px 18px 18px;
-  background: radial-gradient(circle at top left, rgba(96, 165, 250, 0.35), transparent 55%),
-              radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.35), transparent 55%),
-              #0f172a;
-  color: #e5e7eb;
-  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.70);
+  background: radial-gradient(circle at top left, rgb(77, 243, 39), transparent 100%),
+              radial-gradient(circle at bottom right, rgba(63, 211, 52, 0.35), transparent 100%),
+  #4df327;
+  color: #290047;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.70);
   overflow: hidden;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 12px;
   border: 1px solid rgba(148, 163, 184, 0.6);
-  animation: fikaGlow 3.4s ease-in-out infinite;
 }
 
 .fika-reminder::before{
@@ -185,7 +184,7 @@ body {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: #a5b4fc;
+  color: #290047;
   margin-bottom: 2px;
 }
 
@@ -194,7 +193,7 @@ body {
   z-index: 1;
   font-weight: 700;
   font-size: 1.05rem;
-  color: #f9fafb;
+  color: #290047;
   text-align: left;
 }
 
@@ -213,20 +212,7 @@ body {
   animation: fikaBite 1.6s ease-in-out infinite;
 }
 
-@keyframes fikaGlow {
-  0% {
-    transform: translateY(0);
-    box-shadow: 0 22px 45px rgba(15, 23, 42, 0.70);
-  }
-  50% {
-    transform: translateY(-2px);
-    box-shadow: 0 26px 55px rgba(15, 23, 42, 0.80);
-  }
-  100% {
-    transform: translateY(0);
-    box-shadow: 0 22px 45px rgba(15, 23, 42, 0.70);
-  }
-}
+
 
 @keyframes fikaBite {
   0%, 100% {
