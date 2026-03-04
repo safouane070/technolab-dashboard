@@ -198,6 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['confirm_delete']) &&
     <title>Nieuwe medewerker toevoegen</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/add.css">
+    <link rel="stylesheet" href="css/media.css">
     <style>
         /* Voeg hier je CSS voor popup en sectorbeheer toe, bijvoorbeeld overlay en .popup-card */
     </style>
