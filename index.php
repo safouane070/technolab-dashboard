@@ -389,7 +389,8 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </table>
     </div>
 
-    <br>
+    
+
     <a href="add.php"><button>➕ Voeg een medewerker toe</button></a>
 </main>
 
@@ -477,3 +478,5 @@ $werknemersStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="js/dagplanning.js"></script>
 </body>
 </html>
+
+ 
