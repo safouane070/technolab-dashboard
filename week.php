@@ -1,10 +1,5 @@
 <?php
-try {
-    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Fout!: " . $e->getMessage());
-}
+require_once __DIR__ . '/Database/db_connection.php';
 
 // Week offset (0 = deze week, +1 volgende week, -1 vorige week)
 $weekOffset = isset($_GET['week']) ? intval($_GET['week']) : 0;

@@ -8,13 +8,7 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-//  Database connectie
-try {
-    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Fout!: " . $e->getMessage());
-}
+require_once __DIR__ . '/Database/db_connection.php';
 
 //  Dag bepalen
 $daysMap = [1=>'ma', 2=>'di', 3=>'wo', 4=>'do', 5=>'vr'];

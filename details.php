@@ -1,11 +1,6 @@
 <?php
 session_start();
-try {
-    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Fout!: " . $e->getMessage());
-}
+require_once __DIR__ . '/Database/db_connection.php';
 
 if (!isset($_GET['id'])) {
     die("Geen werknemer geselecteerd.");

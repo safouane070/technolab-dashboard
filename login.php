@@ -2,12 +2,7 @@
 session_start();
 
 // Verbinding met database
-try {
-    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Databasefout: " . $e->getMessage());
-}
+require_once __DIR__ . '/Database/db_connection.php';
 
 $error = "";
 

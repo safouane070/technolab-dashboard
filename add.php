@@ -9,13 +9,7 @@ if (!isset($_SESSION['csrf_token'])) {
 // Admin check
 $isAdmin = boolval($_SESSION['admin_logged_in'] ?? false);
 
-// Database connectie
-try {
-    $db = new PDO("mysql:host=localhost;dbname=technolab-dashboard", "root", "");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Databasefout: " . $e->getMessage());
-}
+require_once __DIR__ . '/Database/db_connection.php';
 
 $sectorenFile = __DIR__ . '/sectoren.json';
 
